@@ -21,6 +21,7 @@ public class Lexer
   public void NextToken()
   {
     skipWhiteSpace();
+
     if (matchChar('\0', TokenKind.Eof)) return;
     if (matchChar(',', TokenKind.Comma)) return;
     if (matchChar(';', TokenKind.Semicolon)) return;
@@ -40,6 +41,7 @@ public class Lexer
     if (matchKeyword("return", TokenKind.ReturnKW)) return;
     if (matchKeyword("void", TokenKind.VoidKW)) return;
     if (matchIdent()) return;
+
     Diagnostics.Report(MessageKind.Fatal, $"Unexpected character '{currentChar}' [{line}:{column}]");
   }
 
@@ -69,6 +71,7 @@ public class Lexer
       pos++;
       return;
     }
+
     column++;
     pos++;
   }
@@ -83,6 +86,7 @@ public class Lexer
   {
     if (currentChar() != c)
       return false;
+
     CurrentToken = new Token(kind, line, column, c.ToString());
     nextChar();
     return true;
@@ -91,10 +95,16 @@ public class Lexer
   private bool matchKeyword(string keyword, TokenKind kind)
   {
     var length = keyword.Length;
-    if (Source.Substring(pos, length) != keyword
-      || (pos + length < Source.Length && char.IsLetterOrDigit(Source[pos + length]))
-      || (pos + length < Source.Length && Source[pos + length] == '_'))
+    if (pos + length >= Source.Length)
       return false;
+
+    if (Source.Substring(pos, length) != keyword)
+      return false;
+
+    var c = charAt(length);
+    if (char.IsLetterOrDigit(c) || c == '_')
+      return false;
+
     CurrentToken = new Token(kind, line, column, keyword);
     nextChars(length);
     return true;
@@ -105,9 +115,11 @@ public class Lexer
     TokenKind kind = TokenKind.IntLiteral;
     if (!char.IsDigit(currentChar()))
       return false;
+
     var length = 1;
     while (char.IsDigit(charAt(length)))
       length++;
+
     if (charAt(length) == '.')
     {
       kind = TokenKind.FloatLiteral;
@@ -115,6 +127,7 @@ public class Lexer
       while (char.IsDigit(charAt(length)))
         length++;
     }
+
     CurrentToken = new Token(kind, line, column, Source.Substring(pos, length));
     nextChars(length);
     return true;
@@ -124,9 +137,11 @@ public class Lexer
   {
     if (currentChar() != '_' && !char.IsLetter(currentChar()))
       return false;
+
     var length = 1;
     while (charAt(length) == '_' || char.IsLetterOrDigit(charAt(length)))
       length++;
+
     CurrentToken = new Token(TokenKind.Ident, line, column, Source.Substring(pos, length));
     nextChars(length);
     return true;

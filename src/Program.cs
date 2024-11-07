@@ -2,7 +2,7 @@
 {
   private static int Main()
   {
-    var source = "function int main() {\n  return 0;\n}";
+    var source = "function float sum(float a, float b) { return a + b; }";
 
     var compiler = new Compiler(source);
     compiler.Compile();

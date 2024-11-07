@@ -2,16 +2,15 @@
 public class Lexer
 {
   public string Source { get; }
-  public Diagnostics Diagnostics { get; }
+  public Diagnostics Diagnostics { get; } = new Diagnostics();
   private int pos;
   private int line;
   private int column;
   public Token CurrentToken { get; private set; }
 
-  public Lexer(string source, Diagnostics diagnostics)
+  public Lexer(string source)
   {
     Source = source;
-    Diagnostics = diagnostics;
     pos = 0;
     line = 1;
     column = 1;
@@ -41,7 +40,7 @@ public class Lexer
     if (matchKeyword("return", TokenKind.ReturnKW)) return;
     if (matchKeyword("void", TokenKind.VoidKW)) return;
     if (matchIdent()) return;
-    Diagnostics.Report(MessageKind.Fatal, $"Unexpected character '{currentChar}' at {line}:{column}");
+    Diagnostics.Report(MessageKind.Fatal, $"Unexpected character '{currentChar}' [{line}:{column}]");
   }
 
   public bool Match(TokenKind kind) => CurrentToken.Kind == kind;

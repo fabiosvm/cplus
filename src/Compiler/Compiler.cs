@@ -4,10 +4,10 @@ public class Compiler
   public Lexer Lexer { get; }
   public Diagnostics Diagnostics { get; }
 
-  public Compiler(Lexer lexer)
+  public Compiler(string source)
   {
-    Lexer = lexer;
-    Diagnostics = lexer.Diagnostics;
+    Lexer = new Lexer(source);
+    Diagnostics = Lexer.Diagnostics;
   }
 
   public void Compile()
@@ -41,7 +41,7 @@ public class Compiler
     var column = currentToken().Column;
     var lexeme = currentToken().Lexeme;
     var text = match(TokenKind.Eof) ? "end of file" : $"token '{lexeme}'";
-    Diagnostics.Report(MessageKind.Fatal, $"Unexpected {text} at {line}:{column}");
+    Diagnostics.Report(MessageKind.Fatal, $"Unexpected {text} [{line}:{column}]");
   }
 
   private void compileModule()
@@ -136,6 +136,8 @@ public class Compiler
       compileParam();
       if (isFatal()) return;
     }
+
+    consume(TokenKind.RParen);
   }
 
   private void compileParam()

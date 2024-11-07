@@ -3,11 +3,12 @@
   private static int Main()
   {
     var source = "function int main() {\n  return 0;\n}";
-    var diagnostics = new Diagnostics();
-    var lexer = new Lexer(source, diagnostics);
-    var compiler = new Compiler(lexer);
+
+    var compiler = new Compiler(source);
     compiler.Compile();
-    diagnostics.Print();
+
+    compiler.Diagnostics.Print();
+
     return 0;
   }
 }

@@ -1,9 +1,9 @@
 
-program                   ::= decl* EOF
+module                    ::= decl* EOF
 
 decl                      ::= func_decl
 
-func_decl                 ::= ret_type IDENT param_list block
+func_decl                 ::= "function" ret_type IDENT param_list block
 
 ret_type                  ::= "void" | type
 
@@ -15,8 +15,12 @@ param                     ::= type IDENT
 
 block                     ::= "{" stmt* "}"
 
-stmt                      ::= "return" expr? ";"
-                            | expr ";"
+stmt                      ::= return_stmt
+                            | expr_stmt
+
+return_stmt               ::= "return" expr? ";"
+
+expr_stmt                 ::= expr ";"
 
 expr                      ::= mul_expr ( ( "+" | "-" ) mul_expr )*
 

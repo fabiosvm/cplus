@@ -36,12 +36,15 @@ public class Lexer
     if (matchChar('%', TokenKind.Percent)) return;
     if (matchNumber()) return;
     if (matchKeyword("float", TokenKind.FloatKW)) return;
+    if (matchKeyword("function", TokenKind.FunctionKW)) return;
     if (matchKeyword("int", TokenKind.IntKW)) return;
     if (matchKeyword("return", TokenKind.ReturnKW)) return;
     if (matchKeyword("void", TokenKind.VoidKW)) return;
     if (matchIdent()) return;
     Diagnostics.Report(MessageKind.Fatal, $"Unexpected character '{currentChar}' at {line}:{column}");
   }
+
+  public bool Match(TokenKind kind) => CurrentToken.Kind == kind;
 
   private char charAt(int offset)
   {
@@ -73,7 +76,7 @@ public class Lexer
 
   private void nextChars(int n)
   {
-    for (int i = 0; i < n; i++)
+    for (var i = 0; i < n; i++)
       nextChar();
   }
 
@@ -88,7 +91,7 @@ public class Lexer
 
   private bool matchKeyword(string keyword, TokenKind kind)
   {
-    int length = keyword.Length;
+    var length = keyword.Length;
     if (Source.Substring(pos, length) != keyword
       || (pos + length < Source.Length && char.IsLetterOrDigit(Source[pos + length]))
       || (pos + length < Source.Length && Source[pos + length] == '_'))
@@ -103,7 +106,7 @@ public class Lexer
     TokenKind kind = TokenKind.IntLiteral;
     if (!char.IsDigit(currentChar()))
       return false;
-    int length = 1;
+    var length = 1;
     while (char.IsDigit(charAt(length)))
       length++;
     if (charAt(length) == '.')
@@ -122,7 +125,7 @@ public class Lexer
   {
     if (currentChar() != '_' && !char.IsLetter(currentChar()))
       return false;
-    int length = 1;
+    var length = 1;
     while (charAt(length) == '_' || char.IsLetterOrDigit(charAt(length)))
       length++;
     CurrentToken = new Token(TokenKind.Ident, line, column, Source.Substring(pos, length));

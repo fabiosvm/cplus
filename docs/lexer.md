@@ -20,6 +20,7 @@
 | IntLiteral | `[0-9]+` |
 | FloatLiteral | `[0-9]+\.[0-9]+` |
 | FloatKW | `float` |
+| FunctionKW | `function` |
 | IntKW | `int` |
 | ReturnKW | `return` |
 | VoidKW | `void` |

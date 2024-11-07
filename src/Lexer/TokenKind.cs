@@ -17,6 +17,7 @@ public enum TokenKind
   IntLiteral,
   FloatLiteral,
   FloatKW,
+  FunctionKW,
   IntKW,
   ReturnKW,
   VoidKW,

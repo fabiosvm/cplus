@@ -17,7 +17,7 @@ public class Diagnostics
   {
     if (Messages.Count == 0)
       return false;
-    int last = Messages.Count - 1;
+    var last = Messages.Count - 1;
     return Messages[last].Kind == MessageKind.Fatal;
   }
 

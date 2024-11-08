@@ -29,6 +29,7 @@ public class Lexer
     if (matchChar(')', TokenKind.RParen)) return;
     if (matchChar('{', TokenKind.LBrace)) return;
     if (matchChar('}', TokenKind.RBrace)) return;
+    if (matchChar('=', TokenKind.Eq)) return;
     if (matchChar('+', TokenKind.Plus)) return;
     if (matchChar('-', TokenKind.Minus)) return;
     if (matchChar('*', TokenKind.Star)) return;
@@ -36,9 +37,10 @@ public class Lexer
     if (matchChar('%', TokenKind.Percent)) return;
     if (matchNumber()) return;
     if (matchKeyword("float", TokenKind.FloatKW)) return;
-    if (matchKeyword("function", TokenKind.FunctionKW)) return;
+    if (matchKeyword("func", TokenKind.FuncKW)) return;
     if (matchKeyword("int", TokenKind.IntKW)) return;
     if (matchKeyword("return", TokenKind.ReturnKW)) return;
+    if (matchKeyword("var", TokenKind.VarKW)) return;
     if (matchKeyword("void", TokenKind.VoidKW)) return;
     if (matchIdent()) return;
 
@@ -46,6 +48,16 @@ public class Lexer
   }
 
   public bool Match(TokenKind kind) => CurrentToken.Kind == kind;
+
+  public LexerState Save() => new LexerState(pos, line, column, CurrentToken);
+
+  public void Restore(LexerState state)
+  {
+    pos = state.Pos;
+    line = state.Line;
+    column = state.Column;
+    CurrentToken = state.CurrentToken;
+  }
 
   private char charAt(int offset)
   {

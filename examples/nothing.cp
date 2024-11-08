@@ -1,4 +1,3 @@
 
-function int main() {
-  return 0;
+func void main() {
 }

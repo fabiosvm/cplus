@@ -9,6 +9,7 @@ public enum TokenKind
   RParen,
   LBrace,
   RBrace,
+  Eq,
   Plus,
   Minus,
   Star,
@@ -17,9 +18,10 @@ public enum TokenKind
   IntLiteral,
   FloatLiteral,
   FloatKW,
-  FunctionKW,
+  FuncKW,
   IntKW,
   ReturnKW,
+  VarKW,
   VoidKW,
   Ident
 }

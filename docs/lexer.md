@@ -12,6 +12,7 @@
 | RParen | `)` |
 | LBrace | `{` |
 | RBrace | `}` |
+| Eq | `=` |
 | Plus | `+` |
 | Minus | `-` |
 | Star | `*` |
@@ -20,8 +21,9 @@
 | IntLiteral | `[0-9]+` |
 | FloatLiteral | `[0-9]+\.[0-9]+` |
 | FloatKW | `float` |
-| FunctionKW | `function` |
+| FuncKW | `func` |
 | IntKW | `int` |
 | ReturnKW | `return` |
+| VarKW | `var` |
 | VoidKW | `void` |
 | Ident | `[a-zA-Z_][a-zA-Z0-9_]*` |

@@ -1,13 +1,15 @@
 
 module                    ::= decl* EOF
 
-decl                      ::= func_decl
+decl                      ::= var_decl | func_decl
 
-func_decl                 ::= "function" ret_type IDENT param_list block
-
-ret_type                  ::= "void" | type
+var_decl                  ::= "var" type IDENT ( "=" expr )? ";"
 
 type                      ::= "int" | "float"
+
+func_decl                 ::= "func" ret_type IDENT param_list block
+
+ret_type                  ::= "void" | type
 
 param_list                ::= "(" ( param ( "," param )* )? ")"
 
@@ -15,8 +17,12 @@ param                     ::= type IDENT
 
 block                     ::= "{" stmt* "}"
 
-stmt                      ::= return_stmt
+stmt                      ::= var_decl
+                            | assign_stmt
+                            | return_stmt
                             | expr_stmt
+
+assign_stmt               ::= IDENT "=" expr ";"
 
 return_stmt               ::= "return" expr? ";"
 

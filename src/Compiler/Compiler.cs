@@ -55,9 +55,59 @@ public class Compiler
 
   private void compileDecl()
   {
-    if (match(TokenKind.FunctionKW))
+    if (match(TokenKind.VarKW))
+    {
+      compileVarDecl();
+      return;
+    }
+
+    if (match(TokenKind.FuncKW))
     {
       compileFuncDecl();
+      return;
+    }
+
+    reportUnexpectedToken();
+  }
+
+  private void compileVarDecl()
+  {
+    nextToken();
+    if (isFatal()) return;
+  
+    compileType();
+    if (isFatal()) return;
+  
+    if (!match(TokenKind.Ident))
+    {
+      reportUnexpectedToken();
+      return;
+    }
+    nextToken();
+  
+    if (match(TokenKind.Eq))
+    {
+      nextToken();
+      if (isFatal()) return;
+  
+      compileExpr();
+      if (isFatal()) return;
+    }
+  
+    consume(TokenKind.Semicolon);
+  }
+
+  private void compileType()
+  {
+    if (match(TokenKind.IntKW))
+    {
+      nextToken();
+      return;
+    }
+
+    if (match(TokenKind.FloatKW))
+    {
+      nextToken();
       return;
     }
 
@@ -95,23 +145,6 @@ public class Compiler
     }
 
     compileType();
-  }
-
-  private void compileType()
-  {
-    if (match(TokenKind.IntKW))
-    {
-      nextToken();
-      return;
-    }
-
-    if (match(TokenKind.FloatKW))
-    {
-      nextToken();
-      return;
-    }
-
-    reportUnexpectedToken();
   }
 
   private void compileParamList()
@@ -169,6 +202,15 @@ public class Compiler
 
   private void compileStmt()
   {
+    if (match(TokenKind.VarKW))
+    {
+      compileVarDecl();
+      return;
+    }
+  
+    if (match(TokenKind.Ident))
+      if (compileAssignStmt() || isFatal()) return;
+
     if (match(TokenKind.ReturnKW))
     {
       compileReturnStmt();
@@ -176,6 +218,28 @@ public class Compiler
     }
 
     compileExprStmt();
+  }
+
+  private bool compileAssignStmt()
+  {
+    LexerState state = Lexer.Save();
+
+    nextToken();
+    if (isFatal()) return false;
+
+    if (!match(TokenKind.Eq))
+    {
+      Lexer.Restore(state);
+      return false;
+    }
+    nextToken();
+    if (isFatal()) return false;
+
+    compileExpr();
+    if (isFatal()) return false;
+
+    consume(TokenKind.Semicolon);
+    return true;
   }
 
   private void compileReturnStmt()

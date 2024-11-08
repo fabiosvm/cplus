@@ -5,7 +5,9 @@ decl                      ::= var_decl | func_decl
 
 var_decl                  ::= "var" type IDENT ( "=" expr )? ";"
 
-type                      ::= "int" | "float"
+type                      ::= primitive_type ( "[" "]" )*
+
+primitive_type            ::= "int" | "float"
 
 func_decl                 ::= "func" ret_type IDENT param_list block
 
@@ -22,7 +24,9 @@ stmt                      ::= var_decl
                             | return_stmt
                             | expr_stmt
 
-assign_stmt               ::= IDENT "=" expr ";"
+assign_stmt               ::= IDENT subscr* "=" expr ";"
+
+subscr                    ::= "[" expr "]"
 
 return_stmt               ::= "return" expr? ";"
 
@@ -34,8 +38,11 @@ mul_expr                  ::= unary_expr ( ( "*" | "/" | "%" ) unary_expr )*
 
 unary_expr                ::= ( "+" | "-" ) unary_expr | call_expr
 
-call_expr                 ::= primary_expr ( "(" ( expr ( "," expr )* )? ")" )?
+call_expr                 ::= primary_expr ( subscr | call )*
+
+call                      ::= "(" ( expr ( "," expr )* )? ")"
 
 primary_expr              ::= INT | FLOAT
+                            | "[" ( expr ( "," expr )* )? "]"
                             | IDENT
                             | "(" expr ")"

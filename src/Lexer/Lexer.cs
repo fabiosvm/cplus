@@ -27,6 +27,8 @@ public class Lexer
     if (matchChar(';', TokenKind.Semicolon)) return;
     if (matchChar('(', TokenKind.LParen)) return;
     if (matchChar(')', TokenKind.RParen)) return;
+    if (matchChar('[', TokenKind.LBracket)) return;
+    if (matchChar(']', TokenKind.RBracket)) return;
     if (matchChar('{', TokenKind.LBrace)) return;
     if (matchChar('}', TokenKind.RBrace)) return;
     if (matchChar('=', TokenKind.Eq)) return;

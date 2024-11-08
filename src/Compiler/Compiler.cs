@@ -100,6 +100,21 @@ public class Compiler
 
   private void compileType()
   {
+    compilePrimitiveType();
+    if (isFatal()) return;
+
+    while (match(TokenKind.LBracket))
+    {
+      nextToken();
+      if (isFatal()) return;
+
+      consume(TokenKind.RBracket);
+      if (isFatal()) return;
+    }
+  }
+
+  private void compilePrimitiveType()
+  {
     if (match(TokenKind.IntKW))
     {
       nextToken();
@@ -228,6 +243,12 @@ public class Compiler
     nextToken();
     if (isFatal()) return false;
 
+    while (match(TokenKind.LBracket))
+    {
+      compileSubscr();
+      if (isFatal()) return false;
+    }
+
     if (!match(TokenKind.Eq))
     {
       Lexer.Restore(state);
@@ -241,6 +262,17 @@ public class Compiler
 
     consume(TokenKind.Semicolon);
     return true;
+  }
+
+  private void compileSubscr()
+  {
+    nextToken();
+    if (isFatal()) return;
+
+    compileExpr();
+    if (isFatal()) return;
+
+    consume(TokenKind.RBracket);
   }
 
   private void compileReturnStmt()
@@ -368,12 +400,72 @@ public class Compiler
     compilePrimaryExpr();
     if (isFatal()) return;
 
-    if (match(TokenKind.LParen))
+    for (;;)
+    {
+      if (match(TokenKind.LBracket))
+      {
+        compileSubscr();
+        if (isFatal()) return;
+        continue;
+      }
+
+      if (match(TokenKind.LParen))
+      {
+        compileCall();
+        if (isFatal()) return;
+        continue;
+      }
+
+      break;
+    }
+  }
+
+  private void compileCall()
+  {
+    nextToken();
+    if (isFatal()) return;
+
+    if (match(TokenKind.RParen))
+    {
+      nextToken();
+      return;
+    }
+
+    compileExpr();
+    if (isFatal()) return;
+
+    while (match(TokenKind.Comma))
     {
       nextToken();
       if (isFatal()) return;
 
-      if (match(TokenKind.RParen))
+      compileExpr();
+      if (isFatal()) return;
+    }
+
+    consume(TokenKind.RParen);
+  }
+
+  private void compilePrimaryExpr()
+  {
+    if (match(TokenKind.IntLiteral))
+    {
+      nextToken();
+      return;
+    }
+
+    if (match(TokenKind.FloatLiteral))
+    {
+      nextToken();
+      return;
+    }
+
+    if (match(TokenKind.LBracket))
+    {
+      nextToken();
+      if (isFatal()) return;
+
+      if (match(TokenKind.RBracket))
       {
         nextToken();
         return;
@@ -391,21 +483,7 @@ public class Compiler
         if (isFatal()) return;
       }
 
-      consume(TokenKind.RParen);
-    }
-  }
-
-  private void compilePrimaryExpr()
-  {
-    if (match(TokenKind.IntLiteral))
-    {
-      nextToken();
-      return;
-    }
-
-    if (match(TokenKind.FloatLiteral))
-    {
-      nextToken();
+      consume(TokenKind.RBracket);
       return;
     }
 

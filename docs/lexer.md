@@ -10,6 +10,8 @@
 | Semicolon | `;` |
 | LParen | `(` |
 | RParen | `)` |
+| LBracket | `[` |
+| RBracket | `]` |
 | LBrace | `{` |
 | RBrace | `}` |
 | Eq | `=` |

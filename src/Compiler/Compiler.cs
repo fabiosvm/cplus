@@ -84,6 +84,7 @@ public class Compiler
       return;
     }
     nextToken();
+    if (isFatal()) return;
   
     if (match(TokenKind.Eq))
     {

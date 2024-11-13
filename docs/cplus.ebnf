@@ -7,7 +7,9 @@ var_decl                  ::= "var" type IDENT ( "=" expr )? ";"
 
 type                      ::= primitive_type ( "[" "]" )*
 
-primitive_type            ::= "int" | "float"
+primitive_type            ::= "char" | "short" | "int" | "long"
+                            | "float" | "double"
+                            | "String"
 
 func_decl                 ::= "func" ret_type IDENT param_list block
 
@@ -21,28 +23,54 @@ block                     ::= "{" stmt* "}"
 
 stmt                      ::= var_decl
                             | assign_stmt
+                            | if_stmt
+                            | while_stmt
+                            | do_while_stmt
+                            | break_stmt
+                            | continue_stmt
                             | return_stmt
+                            | block
                             | expr_stmt
 
 assign_stmt               ::= IDENT subscr* "=" expr ";"
 
 subscr                    ::= "[" expr "]"
 
+if_stmt                   ::= "if" "(" expr ")" stmt ( "else" stmt )?
+
+while_stmt                ::= "while" "(" expr ")" stmt
+
+do_while_stmt             ::= "do" stmt "while" "(" expr ")" ";"
+
+break_stmt                ::= "break" ";"
+
+continue_stmt             ::= "continue" ";"
+
 return_stmt               ::= "return" expr? ";"
 
 expr_stmt                 ::= expr ";"
 
-expr                      ::= mul_expr ( ( "+" | "-" ) mul_expr )*
+expr                      ::= and_expr ( "||" and_expr )*
+
+and_expr                  ::= eq_expr ( "&&" eq_expr )*
+
+eq_expr                   ::= rel_expr ( ( "==" | "!=" ) rel_expr )*
+
+rel_expr                  ::= add_expr ( ( "<" | "<=" | ">" | ">=" ) add_expr )*
+
+add_expr                  ::= mul_expr ( ( "+" | "-" ) mul_expr )*
 
 mul_expr                  ::= unary_expr ( ( "*" | "/" | "%" ) unary_expr )*
 
-unary_expr                ::= ( "+" | "-" ) unary_expr | call_expr
+unary_expr                ::= ( "!" | "+" | "-" ) unary_expr | call_expr
 
 call_expr                 ::= primary_expr ( subscr | call )*
 
 call                      ::= "(" ( expr ( "," expr )* )? ")"
 
-primary_expr              ::= INT | FLOAT
-                            | "[" ( expr ( "," expr )* )? "]"
+primary_expr              ::= INT | FLOAT | CHAR | STRING
+                            | array
                             | IDENT
                             | "(" expr ")"
+
+array                     ::= "[" ( expr ( "," expr )* )? "]"

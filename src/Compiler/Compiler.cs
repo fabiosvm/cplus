@@ -74,10 +74,10 @@ public class Compiler
   {
     nextToken();
     if (isFatal()) return;
-  
+
     compileType();
     if (isFatal()) return;
-  
+
     if (!match(TokenKind.Ident))
     {
       reportUnexpectedToken();
@@ -85,16 +85,16 @@ public class Compiler
     }
     nextToken();
     if (isFatal()) return;
-  
+
     if (match(TokenKind.Eq))
     {
       nextToken();
       if (isFatal()) return;
-  
+
       compileExpr();
       if (isFatal()) return;
     }
-  
+
     consume(TokenKind.Semicolon);
   }
 
@@ -115,13 +115,43 @@ public class Compiler
 
   private void compilePrimitiveType()
   {
+    if (match(TokenKind.CharKW))
+    {
+      nextToken();
+      return;
+    }
+
+    if (match(TokenKind.ShortKW))
+    {
+      nextToken();
+      return;
+    }
+
     if (match(TokenKind.IntKW))
     {
       nextToken();
       return;
     }
 
+    if (match(TokenKind.LongKW))
+    {
+      nextToken();
+      return;
+    }
+
     if (match(TokenKind.FloatKW))
+    {
+      nextToken();
+      return;
+    }
+
+    if (match(TokenKind.DoubleKW))
+    {
+      nextToken();
+      return;
+    }
+
+    if (match(TokenKind.StringKW))
     {
       nextToken();
       return;
@@ -149,6 +179,11 @@ public class Compiler
     compileParamList();
     if (isFatal()) return;
 
+    if (!match(TokenKind.LBrace))
+    {
+      reportUnexpectedToken();
+      return;
+    }
     compileBlock();
   }
 
@@ -204,7 +239,7 @@ public class Compiler
 
   private void compileBlock()
   {
-    consume(TokenKind.LBrace);
+    nextToken();
     if (isFatal()) return;
 
     while (!match(TokenKind.RBrace))
@@ -227,9 +262,45 @@ public class Compiler
     if (match(TokenKind.Ident))
       if (compileAssignStmt() || isFatal()) return;
 
+    if (match(TokenKind.IfKW))
+    {
+      compileIfStmt();
+      return;
+    }
+
+    if (match(TokenKind.WhileKW))
+    {
+      compileWhileStmt();
+      return;
+    }
+
+    if (match(TokenKind.DoKW))
+    {
+      compileDoWhileStmt();
+      return;
+    }
+
+    if (match(TokenKind.BreakKW))
+    {
+      compileBreakStmt();
+      return;
+    }
+
+    if (match(TokenKind.ContinueKW))
+    {
+      compileContinueStmt();
+      return;
+    }
+
     if (match(TokenKind.ReturnKW))
     {
       compileReturnStmt();
+      return;
+    }
+
+    if (match(TokenKind.LBrace))
+    {
+      compileBlock();
       return;
     }
 
@@ -275,6 +346,84 @@ public class Compiler
     consume(TokenKind.RBracket);
   }
 
+  private void compileIfStmt()
+  {
+    nextToken();
+    if (isFatal()) return;
+
+    consume(TokenKind.LParen);
+    if (isFatal()) return;
+
+    compileExpr();
+    if (isFatal()) return;
+
+    consume(TokenKind.RParen);
+    if (isFatal()) return;
+
+    compileStmt();
+    if (isFatal()) return;
+
+    if (match(TokenKind.ElseKW))
+    {
+      nextToken();
+      if (isFatal()) return;
+
+      compileStmt();
+    }
+  }
+
+  private void compileWhileStmt()
+  {
+    nextToken();
+    if (isFatal()) return;
+
+    consume(TokenKind.LParen);
+    if (isFatal()) return;
+
+    compileExpr();
+    if (isFatal()) return;
+
+    consume(TokenKind.RParen);
+    if (isFatal()) return;
+
+    compileStmt();
+  }
+
+  private void compileDoWhileStmt()
+  {
+    nextToken();
+    if (isFatal()) return;
+
+    compileStmt();
+    if (isFatal()) return;
+
+    consume(TokenKind.WhileKW);
+    if (isFatal()) return;
+
+    consume(TokenKind.LParen);
+    if (isFatal()) return;
+
+    compileExpr();
+    if (isFatal()) return;
+
+    consume(TokenKind.RParen);
+    if (isFatal()) return;
+
+    consume(TokenKind.Semicolon);
+  }
+
+  private void compileBreakStmt()
+  {
+    nextToken();
+    consume(TokenKind.Semicolon);
+  }
+
+  private void compileContinueStmt()
+  {
+    nextToken();
+    consume(TokenKind.Semicolon);
+  }
+
   private void compileReturnStmt()
   {
     nextToken();
@@ -302,6 +451,118 @@ public class Compiler
 
   private void compileExpr()
   {
+    compileAndExpr();
+    if (isFatal()) return;
+
+    while (match(TokenKind.PipePipe))
+    {
+      nextToken();
+      if (isFatal()) return;
+
+      compileAndExpr();
+      if (isFatal()) return;
+    }
+  }
+
+  private void compileAndExpr()
+  {
+    compileEqExpr();
+    if (isFatal()) return;
+
+    while (match(TokenKind.AmpAmp))
+    {
+      nextToken();
+      if (isFatal()) return;
+
+      compileEqExpr();
+      if (isFatal()) return;
+    }
+  }
+
+  private void compileEqExpr()
+  {
+    compileRelExpr();
+    if (isFatal()) return;
+
+    for (;;)
+    {
+      if (match(TokenKind.EqEq))
+      {
+        nextToken();
+        if (isFatal()) return;
+
+        compileRelExpr();
+        if (isFatal()) return;
+        continue;
+      }
+
+      if (match(TokenKind.NotEq))
+      {
+        nextToken();
+        if (isFatal()) return;
+
+        compileRelExpr();
+        if (isFatal()) return;
+        continue;
+      }
+
+      break;
+    }
+  }
+
+  private void compileRelExpr()
+  {
+    compileAddExpr();
+    if (isFatal()) return;
+
+    for (;;)
+    {
+      if (match(TokenKind.Lt))
+      {
+        nextToken();
+        if (isFatal()) return;
+
+        compileAddExpr();
+        if (isFatal()) return;
+        continue;
+      }
+
+      if (match(TokenKind.LtEq))
+      {
+        nextToken();
+        if (isFatal()) return;
+
+        compileAddExpr();
+        if (isFatal()) return;
+        continue;
+      }
+
+      if (match(TokenKind.Gt))
+      {
+        nextToken();
+        if (isFatal()) return;
+
+        compileAddExpr();
+        if (isFatal()) return;
+        continue;
+      }
+
+      if (match(TokenKind.GtEq))
+      {
+        nextToken();
+        if (isFatal()) return;
+
+        compileAddExpr();
+        if (isFatal()) return;
+        continue;
+      }
+
+      break;
+    }
+  }
+
+  private void compileAddExpr()
+  {
     compileMulExpr();
     if (isFatal()) return;
 
@@ -316,7 +577,7 @@ public class Compiler
         if (isFatal()) return;
         continue;
       }
-    
+
       if (match(TokenKind.Minus))
       {
         nextToken();
@@ -326,7 +587,7 @@ public class Compiler
         if (isFatal()) return;
         continue;
       }
-    
+
       break;
     }
   }
@@ -374,6 +635,15 @@ public class Compiler
 
   private void compileUnaryExpr()
   {
+    if (match(TokenKind.Not))
+    {
+      nextToken();
+      if (isFatal()) return;
+
+      compileUnaryExpr();
+      return;
+    }
+
     if (match(TokenKind.Plus))
     {
       nextToken();
@@ -460,30 +730,21 @@ public class Compiler
       return;
     }
 
-    if (match(TokenKind.LBracket))
+    if (match(TokenKind.CharLiteral))
     {
       nextToken();
-      if (isFatal()) return;
+      return;
+    }
 
-      if (match(TokenKind.RBracket))
-      {
-        nextToken();
-        return;
-      }
+    if (match(TokenKind.StringLiteral))
+    {
+      nextToken();
+      return;
+    }
 
-      compileExpr();
-      if (isFatal()) return;
-
-      while (match(TokenKind.Comma))
-      {
-        nextToken();
-        if (isFatal()) return;
-
-        compileExpr();
-        if (isFatal()) return;
-      }
-
-      consume(TokenKind.RBracket);
+    if (match(TokenKind.LBracket))
+    {
+      compileArray();
       return;
     }
 
@@ -506,5 +767,31 @@ public class Compiler
     }
 
     reportUnexpectedToken();
+  }
+
+  private void compileArray()
+  {
+    nextToken();
+    if (isFatal()) return;
+
+    if (match(TokenKind.RBracket))
+    {
+      nextToken();
+      return;
+    }
+
+    compileExpr();
+    if (isFatal()) return;
+
+    while (match(TokenKind.Comma))
+    {
+      nextToken();
+      if (isFatal()) return;
+
+      compileExpr();
+      if (isFatal()) return;
+    }
+
+    consume(TokenKind.RBracket);
   }
 }

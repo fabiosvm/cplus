@@ -43,7 +43,6 @@ public enum TokenKind
   LongKW,
   ReturnKW,
   ShortKW,
-  StringKW,
   VarKW,
   VoidKW,
   WhileKW,

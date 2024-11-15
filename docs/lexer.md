@@ -46,7 +46,6 @@
 | LongKW | `long` |
 | ReturnKW | `return` |
 | ShortKW | `short` |
-| StringKW | `String` |
 | VarKW | `var` |
 | VoidKW | `void` |
 | WhileKW | `while` |

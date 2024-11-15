@@ -171,12 +171,6 @@ public class Parser
       return;
     }
 
-    if (match(TokenKind.StringKW))
-    {
-      nextToken();
-      return;
-    }
-
     reportUnexpectedToken();
   }
 
@@ -951,7 +945,7 @@ public class Parser
       var token = currentToken();
       nextToken();
       if (isFatal()) return Node.Invalid;
-      return new IntNode(token);
+      return new IntLiteralNode(token);
     }
 
     if (match(TokenKind.FloatLiteral))
@@ -959,7 +953,7 @@ public class Parser
       var token = currentToken();
       nextToken();
       if (isFatal()) return Node.Invalid;
-      return new FloatNode(token);
+      return new FloatLiteralNode(token);
     }
 
     if (match(TokenKind.CharLiteral))
@@ -967,7 +961,7 @@ public class Parser
       var token = currentToken();
       nextToken();
       if (isFatal()) return Node.Invalid;
-      return new CharNode(token);
+      return new CharLiteralNode(token);
     }
 
     if (match(TokenKind.StringLiteral))
@@ -975,7 +969,7 @@ public class Parser
       var token = currentToken();
       nextToken();
       if (isFatal()) return Node.Invalid;
-      return new StringNode(token);
+      return new StringLiteralNode(token);
     }
 
     if (match(TokenKind.LBracket))

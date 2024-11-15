@@ -14,7 +14,7 @@ public class Lexer
     pos = 0;
     line = 1;
     column = 1;
-    CurrentToken = Token.Invalid;
+    CurrentToken = Token.None;
     NextToken();
   }
 
@@ -177,7 +177,8 @@ public class Lexer
         length++;
     }
 
-    CurrentToken = new Token(kind, line, column, Source.Substring(pos, length));
+    var lexeme = Source.Substring(pos, length);
+    CurrentToken = new Token(kind, line, column, lexeme);
     nextChars(length);
     return true;
   }
@@ -214,7 +215,8 @@ public class Lexer
       length++;
     }
 
-    CurrentToken = new Token(TokenKind.StringLiteral, line, column, Source.Substring(pos, length - 1));
+    var lexeme = Source.Substring(pos + 1, length - 1);
+    CurrentToken = new Token(TokenKind.StringLiteral, line, column, lexeme);
     nextChars(length + 1);
     return true;
   }
@@ -228,7 +230,8 @@ public class Lexer
     while (charAt(length) == '_' || char.IsLetterOrDigit(charAt(length)))
       length++;
 
-    CurrentToken = new Token(TokenKind.Ident, line, column, Source.Substring(pos, length));
+    var lexeme = Source.Substring(pos, length);
+    CurrentToken = new Token(TokenKind.Ident, line, column, lexeme);
     nextChars(length);
     return true;
   }

@@ -1,7 +1,7 @@
 
 public enum TokenKind
 {
-  Invalid,
+  None,
   Eof,
   Comma,
   Semicolon,

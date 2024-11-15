@@ -1,5 +1,5 @@
 
-public class IdentNode : LeafNode
+public class IdentNode : LiteralNode
 {
   public override Token Token { get; }
   public override string Name { get; } = "Ident";

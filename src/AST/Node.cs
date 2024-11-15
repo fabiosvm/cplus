@@ -1,7 +1,7 @@
 
 public interface Node
 {
-  public static readonly Node Invalid = new InvalidNode();
+  public static readonly Node None = new NoneNode();
 
   Token Token { get; }
   bool IsLeaf { get; }

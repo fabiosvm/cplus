@@ -3,7 +3,7 @@ public class Parser
 {
   public Lexer Lexer { get; }
   public Diagnostics Diagnostics { get; }
-  public Node Ast { get; private set; } = new InvalidNode();
+  public Node Ast { get; private set; } = Node.None;
 
   public Parser(string source)
   {
@@ -53,7 +53,7 @@ public class Parser
     while (!match(TokenKind.Eof))
     {
       var decl = parseDecl();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
       ast.Children.Add(decl);
     }
     return ast;
@@ -68,26 +68,26 @@ public class Parser
       return parseFuncDecl();
 
     reportUnexpectedToken();
-    return Node.Invalid;
+    return Node.None;
   }
 
   private Node parseVarDecl()
   {
     var varToken = currentToken();
     nextToken();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     var type = parseType();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     if (!match(TokenKind.Ident))
     {
       reportUnexpectedToken();
-      return Node.Invalid;
+      return Node.None;
     }
     var identToken = currentToken();
     nextToken();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     var ident = new IdentNode(identToken);
     var varDecl = new VarDeclNode(varToken);
@@ -98,13 +98,13 @@ public class Parser
     {
       var eqToken = currentToken();
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
 
       var expr = parseExpr();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
 
       consume(TokenKind.Semicolon);
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
 
       var assign = new AssignNode(eqToken);
       assign.Children.Add(varDecl);
@@ -113,7 +113,7 @@ public class Parser
     }
 
     consume(TokenKind.Semicolon);
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     return varDecl;
   }
@@ -121,16 +121,16 @@ public class Parser
   private Node parseType()
   {
     var type = parsePrimitiveType();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     while (match(TokenKind.LBracket))
     {
       var token = currentToken();
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
 
       consume(TokenKind.RBracket);
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
 
       var arrayType = new ArrayTypeNode(token);
       arrayType.Children.Add(type);
@@ -146,7 +146,7 @@ public class Parser
     {
       var token = currentToken();
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
       return new CharTypeNode(token);
     }
 
@@ -154,7 +154,7 @@ public class Parser
     {
       var token = currentToken();
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
       return new ShortTypeNode(token);
     }
 
@@ -162,7 +162,7 @@ public class Parser
     {
       var token = currentToken();
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
       return new IntTypeNode(token);
     }
 
@@ -170,7 +170,7 @@ public class Parser
     {
       var token = currentToken();
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
       return new LongTypeNode(token);
     }
 
@@ -178,7 +178,7 @@ public class Parser
     {
       var token = currentToken();
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
       return new FloatTypeNode(token);
     }
 
@@ -186,42 +186,42 @@ public class Parser
     {
       var token = currentToken();
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
       return new DoubleTypeNode(token);
     }
 
     reportUnexpectedToken();
-    return Node.Invalid;
+    return Node.None;
   }
 
   private Node parseFuncDecl()
   {
     var funcToken = currentToken();
     nextToken();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     var retType = parseRetType();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     if (!match(TokenKind.Ident))
     {
       reportUnexpectedToken();
-      return Node.Invalid;
+      return Node.None;
     }
     var identToken = currentToken();
     nextToken();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     var paramList = parseParamList();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     if (!match(TokenKind.LBrace))
     {
       reportUnexpectedToken();
-      return Node.Invalid;
+      return Node.None;
     }
     var block = parseBlock();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     var ident = new IdentNode(identToken);
     var funcDecl = new FuncDeclNode(funcToken);
@@ -239,7 +239,7 @@ public class Parser
     {
       var token = currentToken();
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
 
       return new VoidTypeNode(token);
     }
@@ -252,37 +252,37 @@ public class Parser
     if (!match(TokenKind.LParen))
     {
       reportUnexpectedToken();
-      return Node.Invalid;
+      return Node.None;
     }
     var token = currentToken();
     nextToken();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     var paramList = new ParamListNode(token);
 
     if (match(TokenKind.RParen))
     {
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
       return paramList;
     }
 
     var param = parseParam();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
     paramList.Children.Add(param);
 
     while (match(TokenKind.Comma))
     {
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
 
       param = parseParam();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
       paramList.Children.Add(param);
     }
 
     consume(TokenKind.RParen);
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     return paramList;
   }
@@ -290,16 +290,16 @@ public class Parser
   private Node parseParam()
   {
     var type = parseType();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     if (!match(TokenKind.Ident))
     {
       reportUnexpectedToken();
-      return Node.Invalid;
+      return Node.None;
     }
     var identToken = currentToken();
     nextToken();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     var ident = new IdentNode(identToken);
     var param = new ParamNode(identToken);
@@ -313,19 +313,19 @@ public class Parser
   {
     var token = currentToken();
     nextToken();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     var block = new BlockNode(token);
 
     while (!match(TokenKind.RBrace))
     {
       var stmt = parseStmt();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
       block.Children.Add(stmt);
     }
 
     consume(TokenKind.RBrace);
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     return block;
   }
@@ -338,7 +338,7 @@ public class Parser
     if (match(TokenKind.Ident))
     {
       var assign = parseAssignStmt();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
       if (assign != null) return assign;
     }
 
@@ -408,13 +408,13 @@ public class Parser
   {
     var token = currentToken();
     nextToken();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     var rhs = parseExpr();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     consume(TokenKind.RBracket);
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     var subscr = new ElementNode(token);
     subscr.Children.Add(lhs);
@@ -426,19 +426,19 @@ public class Parser
   {
     var token = currentToken();
     nextToken();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     consume(TokenKind.LParen);
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     var expr = parseExpr();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     consume(TokenKind.RParen);
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     var thenStmt = parseStmt();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     var ifStmt = new IfNode(token);
     ifStmt.Children.Add(expr);
@@ -448,10 +448,10 @@ public class Parser
       return ifStmt;
 
     nextToken();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     var elseStmt = parseStmt();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     var ifElseStmt = new IfElseNode(token);
     ifElseStmt.Children.Add(ifStmt);
@@ -464,19 +464,19 @@ public class Parser
   {
     var token = currentToken();
     nextToken();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     consume(TokenKind.LParen);
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     var expr = parseExpr();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     consume(TokenKind.RParen);
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     var stmt = parseStmt();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     var whileStmt = new WhileNode(token);
     whileStmt.Children.Add(expr);
@@ -489,25 +489,25 @@ public class Parser
   {
     var token = currentToken();
     nextToken();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     var stmt = parseStmt();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     consume(TokenKind.WhileKW);
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     consume(TokenKind.LParen);
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     var expr = parseExpr();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     consume(TokenKind.RParen);
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     consume(TokenKind.Semicolon);
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     var doWhileStmt = new DoWhileNode(token);
     doWhileStmt.Children.Add(stmt);
@@ -520,10 +520,10 @@ public class Parser
   {
     var token = currentToken();
     nextToken();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     consume(TokenKind.Semicolon);
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     return new BreakNode(token);
   }
@@ -532,10 +532,10 @@ public class Parser
   {
     var token = currentToken();
     nextToken();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     consume(TokenKind.Semicolon);
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     return new ContinueNode(token);
   }
@@ -544,21 +544,21 @@ public class Parser
   {
     var token = currentToken();
     nextToken();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     var ret = new ReturnNode(token);
     if (match(TokenKind.Semicolon))
     {
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
       return ret; 
     }
 
     var expr = parseExpr();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     consume(TokenKind.Semicolon);
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     ret.Children.Add(expr);
     return ret;
@@ -567,10 +567,10 @@ public class Parser
   private Node parseExprStmt()
   {
     var expr = parseExpr();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     consume(TokenKind.Semicolon);
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     return expr;
   }
@@ -578,16 +578,16 @@ public class Parser
   private Node parseExpr()
   {
     var lhs = parseAndExpr();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     while (match(TokenKind.PipePipe))
     {
       var token = currentToken();
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
 
       var rhs = parseAndExpr();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
 
       var binOp = new AndNode(token);
       binOp.Children.Add(lhs);
@@ -601,16 +601,16 @@ public class Parser
   private Node parseAndExpr()
   {
     var lhs = parseEqExpr();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     while (match(TokenKind.AmpAmp))
     {
       var token = currentToken();
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
 
       var rhs = parseEqExpr();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
 
       var binOp = new AndNode(token);
       binOp.Children.Add(lhs);
@@ -624,7 +624,7 @@ public class Parser
   private Node parseEqExpr()
   {
     var lhs = parseRelExpr();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     for (;;)
     {
@@ -632,10 +632,10 @@ public class Parser
       {
         var token = currentToken();
         nextToken();
-        if (isFatal()) return Node.Invalid;
+        if (isFatal()) return Node.None;
 
         var rhs = parseRelExpr();
-        if (isFatal()) return Node.Invalid;
+        if (isFatal()) return Node.None;
 
         var binOp = new EqNode(token);
         binOp.Children.Add(lhs);
@@ -648,10 +648,10 @@ public class Parser
       {
         var token = currentToken();
         nextToken();
-        if (isFatal()) return Node.Invalid;
+        if (isFatal()) return Node.None;
 
         var rhs = parseRelExpr();
-        if (isFatal()) return Node.Invalid;
+        if (isFatal()) return Node.None;
 
         var binOp = new NotEqNode(token);
         binOp.Children.Add(lhs);
@@ -669,7 +669,7 @@ public class Parser
   private Node parseRelExpr()
   {
     var lhs = parseAddExpr();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     for (;;)
     {
@@ -677,10 +677,10 @@ public class Parser
       {
         var token = currentToken();
         nextToken();
-        if (isFatal()) return Node.Invalid;
+        if (isFatal()) return Node.None;
 
         var rhs = parseAddExpr();
-        if (isFatal()) return Node.Invalid;
+        if (isFatal()) return Node.None;
 
         var binOp = new LtNode(token);
         binOp.Children.Add(lhs);
@@ -693,10 +693,10 @@ public class Parser
       {
         var token = currentToken();
         nextToken();
-        if (isFatal()) return Node.Invalid;
+        if (isFatal()) return Node.None;
 
         var rhs = parseAddExpr();
-        if (isFatal()) return Node.Invalid;
+        if (isFatal()) return Node.None;
 
         var binOp = new LeNode(token);
         binOp.Children.Add(lhs);
@@ -709,10 +709,10 @@ public class Parser
       {
         var token = currentToken();
         nextToken();
-        if (isFatal()) return Node.Invalid;
+        if (isFatal()) return Node.None;
 
         var rhs = parseAddExpr();
-        if (isFatal()) return Node.Invalid;
+        if (isFatal()) return Node.None;
 
         var binOp = new GtNode(token);
         binOp.Children.Add(lhs);
@@ -725,10 +725,10 @@ public class Parser
       {
         var token = currentToken();
         nextToken();
-        if (isFatal()) return Node.Invalid;
+        if (isFatal()) return Node.None;
 
         var rhs = parseAddExpr();
-        if (isFatal()) return Node.Invalid;
+        if (isFatal()) return Node.None;
 
         var binOp = new GeNode(token);
         binOp.Children.Add(lhs);
@@ -746,7 +746,7 @@ public class Parser
   private Node parseAddExpr()
   {
     var lhs = parseMulExpr();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     for (;;)
     {
@@ -754,10 +754,10 @@ public class Parser
       {
         var token = currentToken();
         nextToken();
-        if (isFatal()) return Node.Invalid;
+        if (isFatal()) return Node.None;
 
         var rhs = parseMulExpr();
-        if (isFatal()) return Node.Invalid;
+        if (isFatal()) return Node.None;
 
         var binOp = new AddNode(token);
         binOp.Children.Add(lhs);
@@ -770,10 +770,10 @@ public class Parser
       {
         var token = currentToken();
         nextToken();
-        if (isFatal()) return Node.Invalid;
+        if (isFatal()) return Node.None;
 
         var rhs = parseMulExpr();
-        if (isFatal()) return Node.Invalid;
+        if (isFatal()) return Node.None;
 
         var binOp = new SubNode(token);
         binOp.Children.Add(lhs);
@@ -791,7 +791,7 @@ public class Parser
   private Node parseMulExpr()
   {
     var lhs = parseUnaryExpr();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     for (;;)
     {
@@ -799,10 +799,10 @@ public class Parser
       {
         var token = currentToken();
         nextToken();
-        if (isFatal()) return Node.Invalid;
+        if (isFatal()) return Node.None;
 
         var rhs = parseUnaryExpr();
-        if (isFatal()) return Node.Invalid;
+        if (isFatal()) return Node.None;
 
         var binOp = new MulNode(token);
         binOp.Children.Add(lhs);
@@ -815,10 +815,10 @@ public class Parser
       {
         var token = currentToken();
         nextToken();
-        if (isFatal()) return Node.Invalid;
+        if (isFatal()) return Node.None;
 
         var rhs = parseUnaryExpr();
-        if (isFatal()) return Node.Invalid;
+        if (isFatal()) return Node.None;
 
         var binOp = new DivNode(token);
         binOp.Children.Add(lhs);
@@ -831,10 +831,10 @@ public class Parser
       {
         var token = currentToken();
         nextToken();
-        if (isFatal()) return Node.Invalid;
+        if (isFatal()) return Node.None;
 
         var rhs = parseUnaryExpr();
-        if (isFatal()) return Node.Invalid;
+        if (isFatal()) return Node.None;
 
         var binOp = new ModNode(token);
         binOp.Children.Add(lhs);
@@ -855,10 +855,10 @@ public class Parser
     {
       var token = currentToken();
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
 
       var expr = parseUnaryExpr();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
 
       var unaryOp = new NotNode(token);
       unaryOp.Children.Add(expr);
@@ -869,10 +869,10 @@ public class Parser
     {
       var token = currentToken();
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
 
       var expr = parseUnaryExpr();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
 
       var unaryOp = new UnaryPlusNode(token);
       unaryOp.Children.Add(expr);
@@ -883,10 +883,10 @@ public class Parser
     {
       var token = currentToken();
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
 
       var expr = parseUnaryExpr();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
 
       var unaryOp = new UnaryMinusNode(token);
       unaryOp.Children.Add(expr);
@@ -899,14 +899,14 @@ public class Parser
   private Node parseCallExpr()
   {
     var lhs = parsePrimaryExpr();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     for (;;)
     {
       if (match(TokenKind.LBracket))
       {
         var rhs = parseSubscr(lhs);
-        if (isFatal()) return Node.Invalid;
+        if (isFatal()) return Node.None;
         lhs = rhs;
         continue;
       }
@@ -914,7 +914,7 @@ public class Parser
       if (match(TokenKind.LParen))
       {
         var rhs = parseCall(lhs);
-        if (isFatal()) return Node.Invalid;
+        if (isFatal()) return Node.None;
         lhs = rhs;
         continue;
       }
@@ -929,7 +929,7 @@ public class Parser
   {
     var token = currentToken();
     nextToken();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     var call = new CallNode(token);
     call.Children.Add(lhs);
@@ -937,26 +937,26 @@ public class Parser
     if (match(TokenKind.RParen))
     {
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
       return call;
     }
 
     var expr = parseExpr();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
     call.Children.Add(expr);
 
     while (match(TokenKind.Comma))
     {
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
 
       expr = parseExpr();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
       call.Children.Add(expr);
     }
 
     consume(TokenKind.RParen);
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     return call;
   }
@@ -967,7 +967,7 @@ public class Parser
     {
       var token = currentToken();
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
       return new IntLiteralNode(token);
     }
 
@@ -975,7 +975,7 @@ public class Parser
     {
       var token = currentToken();
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
       return new FloatLiteralNode(token);
     }
 
@@ -983,7 +983,7 @@ public class Parser
     {
       var token = currentToken();
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
       return new CharLiteralNode(token);
     }
 
@@ -991,7 +991,7 @@ public class Parser
     {
       var token = currentToken();
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
       return new StringLiteralNode(token);
     }
 
@@ -1002,59 +1002,59 @@ public class Parser
     {
       var token = currentToken();
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
       return new IdentNode(token);
     }
 
     if (match(TokenKind.LParen))
     {
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
 
       var expr = parseExpr();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
 
       consume(TokenKind.RParen);
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
 
       return expr;
     }
 
     reportUnexpectedToken();
-    return Node.Invalid;
+    return Node.None;
   }
 
   private Node parseArray()
   {
     var token = currentToken();
     nextToken();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     var array = new ArrayNode(token);
 
     if (match(TokenKind.RBracket))
     {
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
       return array;
     }
 
     var expr = parseExpr();
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
     array.Children.Add(expr);
 
     while (match(TokenKind.Comma))
     {
       nextToken();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
 
       expr = parseExpr();
-      if (isFatal()) return Node.Invalid;
+      if (isFatal()) return Node.None;
       array.Children.Add(expr);
     }
 
     consume(TokenKind.RBracket);
-    if (isFatal()) return Node.Invalid;
+    if (isFatal()) return Node.None;
 
     return array;
   }

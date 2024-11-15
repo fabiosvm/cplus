@@ -1,5 +1,5 @@
 
-public class FloatLiteralNode : LeafNode
+public class FloatLiteralNode : LiteralNode
 {
   public override Token Token { get; }
   public override string Name { get; } = "FloatLiteral";

@@ -5,8 +5,8 @@ abstract public class LeafNode : Node
   public bool IsLeaf { get; } = true;
   public abstract string Name { get; }
 
-  public void Print(int depth)
+  public virtual void Print(int depth)
   {
-    Console.WriteLine($"{new string(' ', depth * 2)}{Name}: {Token.Lexeme}");
+    Console.WriteLine($"{new string(' ', depth * 2)}{Name}");
   }
 }

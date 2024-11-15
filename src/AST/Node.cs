@@ -6,5 +6,6 @@ public interface Node
   Token Token { get; }
   bool IsLeaf { get; }
   string Name { get; }
+
   void Print(int depth);
 }

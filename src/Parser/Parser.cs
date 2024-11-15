@@ -77,8 +77,7 @@ public class Parser
     nextToken();
     if (isFatal()) return Node.Invalid;
 
-    // TODO: Append type to the VarDecl.
-    parseType();
+    var type = parseType();
     if (isFatal()) return Node.Invalid;
 
     if (!match(TokenKind.Ident))
@@ -92,6 +91,7 @@ public class Parser
 
     var ident = new IdentNode(identToken);
     var varDecl = new VarDeclNode(varToken);
+    varDecl.Children.Add(type);
     varDecl.Children.Add(ident);
 
     if (match(TokenKind.Eq))
@@ -118,60 +118,80 @@ public class Parser
     return varDecl;
   }
 
-  private void parseType()
+  private Node parseType()
   {
-    parsePrimitiveType();
-    if (isFatal()) return;
+    var type = parsePrimitiveType();
+    if (isFatal()) return Node.Invalid;
 
     while (match(TokenKind.LBracket))
     {
+      var token = currentToken();
       nextToken();
-      if (isFatal()) return;
+      if (isFatal()) return Node.Invalid;
 
       consume(TokenKind.RBracket);
-      if (isFatal()) return;
+      if (isFatal()) return Node.Invalid;
+
+      var arrayType = new ArrayTypeNode(token);
+      arrayType.Children.Add(type);
+      type = arrayType;
     }
+
+    return type;
   }
 
-  private void parsePrimitiveType()
+  private Node parsePrimitiveType()
   {
     if (match(TokenKind.CharKW))
     {
+      var token = currentToken();
       nextToken();
-      return;
+      if (isFatal()) return Node.Invalid;
+      return new CharTypeNode(token);
     }
 
     if (match(TokenKind.ShortKW))
     {
+      var token = currentToken();
       nextToken();
-      return;
+      if (isFatal()) return Node.Invalid;
+      return new ShortTypeNode(token);
     }
 
     if (match(TokenKind.IntKW))
     {
+      var token = currentToken();
       nextToken();
-      return;
+      if (isFatal()) return Node.Invalid;
+      return new IntTypeNode(token);
     }
 
     if (match(TokenKind.LongKW))
     {
+      var token = currentToken();
       nextToken();
-      return;
+      if (isFatal()) return Node.Invalid;
+      return new LongTypeNode(token);
     }
 
     if (match(TokenKind.FloatKW))
     {
+      var token = currentToken();
       nextToken();
-      return;
+      if (isFatal()) return Node.Invalid;
+      return new FloatTypeNode(token);
     }
 
     if (match(TokenKind.DoubleKW))
     {
+      var token = currentToken();
       nextToken();
-      return;
+      if (isFatal()) return Node.Invalid;
+      return new DoubleTypeNode(token);
     }
 
     reportUnexpectedToken();
+    return Node.Invalid;
   }
 
   private Node parseFuncDecl()
@@ -180,8 +200,7 @@ public class Parser
     nextToken();
     if (isFatal()) return Node.Invalid;
 
-    // TODO: Append return type to the FuncDecl.
-    parseRetType();
+    var retType = parseRetType();
     if (isFatal()) return Node.Invalid;
 
     if (!match(TokenKind.Ident))
@@ -206,6 +225,7 @@ public class Parser
 
     var ident = new IdentNode(identToken);
     var funcDecl = new FuncDeclNode(funcToken);
+    funcDecl.Children.Add(retType);
     funcDecl.Children.Add(ident);
     funcDecl.Children.Add(paramList);
     funcDecl.Children.Add(block);
@@ -213,15 +233,18 @@ public class Parser
     return funcDecl;
   }
 
-  private void parseRetType()
+  private Node parseRetType()
   {
     if (match(TokenKind.VoidKW))
     {
+      var token = currentToken();
       nextToken();
-      return;
+      if (isFatal()) return Node.Invalid;
+
+      return new VoidTypeNode(token);
     }
 
-    parseType();
+    return parseType();
   }
 
   private Node parseParamList()
@@ -266,8 +289,7 @@ public class Parser
 
   private Node parseParam()
   {
-    // TODO: Append type to the Param.
-    parseType();
+    var type = parseType();
     if (isFatal()) return Node.Invalid;
 
     if (!match(TokenKind.Ident))
@@ -281,6 +303,7 @@ public class Parser
 
     var ident = new IdentNode(identToken);
     var param = new ParamNode(identToken);
+    param.Children.Add(type);
     param.Children.Add(ident);
 
     return param;

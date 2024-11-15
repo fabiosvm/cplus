@@ -1,6 +1,8 @@
 
 public class Token
 {
+  public static readonly Token Invalid = new Token(TokenKind.Invalid, -1, -1, string.Empty);
+
   public TokenKind Kind;
   public int Line { get; }
   public int Column { get; }

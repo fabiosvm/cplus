@@ -8,9 +8,11 @@ internal static class Program
     var path = args[0];
     var source = loadSource(path);
 
-    var diagnostics = compile(source);
+    var (diagnostics, ast) = parse(source);
 
     diagnostics.Print();
+    ast.Print(0);
+
     return 0;
   }
 
@@ -39,10 +41,10 @@ internal static class Program
     return File.ReadAllText(path);
   }
 
-  private static Diagnostics compile(string source)
+  private static (Diagnostics, Node) parse(string source)
   {
-    var compiler = new Compiler(source);
-    compiler.Compile();
-    return compiler.Diagnostics;
+    var parser = new Parser(source);
+    parser.Parse();
+    return (parser.Diagnostics, parser.Ast);
   }
 }

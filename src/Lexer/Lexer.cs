@@ -14,7 +14,7 @@ public class Lexer
     pos = 0;
     line = 1;
     column = 1;
-    CurrentToken = new Token(TokenKind.Invalid, -1, -1, string.Empty);
+    CurrentToken = Token.Invalid;
     NextToken();
   }
 

@@ -1,5 +1,5 @@
 
-public class ContinueNode : NonLeafNode
+public class ContinueNode : LeafNode
 {
   public override Token Token { get; }
   public override string Name { get; } = "Continue";

@@ -1,6 +1,4 @@
 
-using System.Collections;
-
 public class Parser
 {
   public Lexer Lexer { get; }
@@ -13,12 +11,13 @@ public class Parser
     Diagnostics = Lexer.Diagnostics;
   }
 
-  // TODO: Implement AST generation.
   public void Parse()
   {
-    parseModule();
+    var ast = parseModule();
     if (isFatal()) return;
+
     Diagnostics.Report(MessageKind.Note, "Parsing completed successfully");
+    Ast = ast;
   }
 
   private Token currentToken() => Lexer.CurrentToken;
@@ -48,58 +47,75 @@ public class Parser
     Diagnostics.Report(MessageKind.Fatal, $"Unexpected {text} [{line}:{column}]");
   }
 
-  private void parseModule()
+  private Node parseModule()
   {
+    var ast = new ModuleNode();
     while (!match(TokenKind.Eof))
     {
-      parseDecl();
-      if (isFatal()) return;
+      var decl = parseDecl();
+      if (isFatal()) return Node.Invalid;
+      ast.Children.Add(decl);
     }
+    return ast;
   }
 
-  private void parseDecl()
+  private Node parseDecl()
   {
     if (match(TokenKind.VarKW))
-    {
-      parseVarDecl();
-      return;
-    }
+      return parseVarDecl();
 
     if (match(TokenKind.FuncKW))
-    {
-      parseFuncDecl();
-      return;
-    }
+      return parseFuncDecl();
 
     reportUnexpectedToken();
+    return Node.Invalid;
   }
 
-  private void parseVarDecl()
+  private Node parseVarDecl()
   {
+    var varToken = currentToken();
     nextToken();
-    if (isFatal()) return;
+    if (isFatal()) return Node.Invalid;
 
+    // TODO: Append type to the VarDecl.
     parseType();
-    if (isFatal()) return;
+    if (isFatal()) return Node.Invalid;
 
     if (!match(TokenKind.Ident))
     {
       reportUnexpectedToken();
-      return;
+      return Node.Invalid;
     }
+    var identToken = currentToken();
     nextToken();
-    if (isFatal()) return;
+    if (isFatal()) return Node.Invalid;
+
+    var ident = new IdentNode(identToken);
+    var varDecl = new VarDeclNode(varToken);
+    varDecl.Children.Add(ident);
 
     if (match(TokenKind.Eq))
     {
+      var eqToken = currentToken();
       nextToken();
-      if (isFatal()) return;
+      if (isFatal()) return Node.Invalid;
 
-      parseExpr();
-      if (isFatal()) return;
+      var expr = parseExpr();
+      if (isFatal()) return Node.Invalid;
+
+      consume(TokenKind.Semicolon);
+      if (isFatal()) return Node.Invalid;
+
+      var assign = new AssignNode(eqToken);
+      assign.Children.Add(varDecl);
+      assign.Children.Add(expr);
+      return assign;
     }
 
     consume(TokenKind.Semicolon);
+    if (isFatal()) return Node.Invalid;
+
+    return varDecl;
   }
 
   private void parseType()
@@ -164,31 +180,43 @@ public class Parser
     reportUnexpectedToken();
   }
 
-  private void parseFuncDecl()
+  private Node parseFuncDecl()
   {
+    var funcToken = currentToken();
     nextToken();
-    if (isFatal()) return;
+    if (isFatal()) return Node.Invalid;
 
+    // TODO: Append return type to the FuncDecl.
     parseRetType();
-    if (isFatal()) return;
+    if (isFatal()) return Node.Invalid;
 
     if (!match(TokenKind.Ident))
     {
       reportUnexpectedToken();
-      return;
+      return Node.Invalid;
     }
+    var identToken = currentToken();
     nextToken();
-    if (isFatal()) return;
+    if (isFatal()) return Node.Invalid;
 
-    parseParamList();
-    if (isFatal()) return;
+    var paramList = parseParamList();
+    if (isFatal()) return Node.Invalid;
 
     if (!match(TokenKind.LBrace))
     {
       reportUnexpectedToken();
-      return;
+      return Node.Invalid;
     }
-    parseBlock();
+    var block = parseBlock();
+    if (isFatal()) return Node.Invalid;
+
+    var ident = new IdentNode(identToken);
+    var funcDecl = new FuncDeclNode(funcToken);
+    funcDecl.Children.Add(ident);
+    funcDecl.Children.Add(paramList);
+    funcDecl.Children.Add(block);
+
+    return funcDecl;
   }
 
   private void parseRetType()
@@ -202,600 +230,815 @@ public class Parser
     parseType();
   }
 
-  private void parseParamList()
+  private Node parseParamList()
   {
-    consume(TokenKind.LParen);
-    if (isFatal()) return;
+    if (!match(TokenKind.LParen))
+    {
+      reportUnexpectedToken();
+      return Node.Invalid;
+    }
+    var token = currentToken();
+    nextToken();
+    if (isFatal()) return Node.Invalid;
+
+    var paramList = new ParamListNode(token);
 
     if (match(TokenKind.RParen))
     {
       nextToken();
-      return;
+      if (isFatal()) return Node.Invalid;
+      return paramList;
     }
 
-    parseParam();
-    if (isFatal()) return;
+    var param = parseParam();
+    if (isFatal()) return Node.Invalid;
+    paramList.Children.Add(param);
 
     while (match(TokenKind.Comma))
     {
       nextToken();
-      if (isFatal()) return;
+      if (isFatal()) return Node.Invalid;
 
-      parseParam();
-      if (isFatal()) return;
+      param = parseParam();
+      if (isFatal()) return Node.Invalid;
+      paramList.Children.Add(param);
     }
 
     consume(TokenKind.RParen);
+    if (isFatal()) return Node.Invalid;
+
+    return paramList;
   }
 
-  private void parseParam()
+  private Node parseParam()
   {
+    // TODO: Append type to the Param.
     parseType();
-    if (isFatal()) return;
+    if (isFatal()) return Node.Invalid;
 
     if (!match(TokenKind.Ident))
     {
       reportUnexpectedToken();
-      return;
+      return Node.Invalid;
     }
+    var identToken = currentToken();
     nextToken();
+    if (isFatal()) return Node.Invalid;
+
+    var ident = new IdentNode(identToken);
+    var param = new ParamNode(identToken);
+    param.Children.Add(ident);
+
+    return param;
   }
 
-  private void parseBlock()
+  private Node parseBlock()
   {
+    var token = currentToken();
     nextToken();
-    if (isFatal()) return;
+    if (isFatal()) return Node.Invalid;
+
+    var block = new BlockNode(token);
 
     while (!match(TokenKind.RBrace))
     {
-      parseStmt();
-      if (isFatal()) return;
+      var stmt = parseStmt();
+      if (isFatal()) return Node.Invalid;
+      block.Children.Add(stmt);
     }
 
     consume(TokenKind.RBrace);
+    if (isFatal()) return Node.Invalid;
+
+    return block;
   }
 
-  private void parseStmt()
+  private Node parseStmt()
   {
     if (match(TokenKind.VarKW))
-    {
-      parseVarDecl();
-      return;
-    }
-  
+      return parseVarDecl();
+
     if (match(TokenKind.Ident))
-      if (parseAssignStmt() || isFatal()) return;
+    {
+      var assign = parseAssignStmt();
+      if (isFatal()) return Node.Invalid;
+      if (assign != null) return assign;
+    }
 
     if (match(TokenKind.IfKW))
-    {
-      parseIfStmt();
-      return;
-    }
+      return parseIfStmt();
 
     if (match(TokenKind.WhileKW))
-    {
-      parseWhileStmt();
-      return;
-    }
+      return parseWhileStmt();
 
     if (match(TokenKind.DoKW))
-    {
-      parseDoWhileStmt();
-      return;
-    }
+      return parseDoWhileStmt();
 
     if (match(TokenKind.BreakKW))
-    {
-      parseBreakStmt();
-      return;
-    }
+      return parseBreakStmt();
 
     if (match(TokenKind.ContinueKW))
-    {
-      parseContinueStmt();
-      return;
-    }
+      return parseContinueStmt();
 
     if (match(TokenKind.ReturnKW))
-    {
-      parseReturnStmt();
-      return;
-    }
+      return parseReturnStmt();
 
     if (match(TokenKind.LBrace))
-    {
-      parseBlock();
-      return;
-    }
+      return parseBlock();
 
-    parseExprStmt();
+    return parseExprStmt();
   }
 
-  private bool parseAssignStmt()
+  private Node? parseAssignStmt()
   {
     LexerState state = Lexer.Save();
 
+    var identToken = currentToken();
     nextToken();
-    if (isFatal()) return false;
+    if (isFatal()) return null;
+
+    Node lhs = new IdentNode(identToken);
 
     while (match(TokenKind.LBracket))
     {
-      parseSubscr();
-      if (isFatal()) return false;
+      var subscr = parseSubscr(lhs);
+      if (isFatal()) return null;
+      lhs = subscr;
     }
 
     if (!match(TokenKind.Eq))
     {
       Lexer.Restore(state);
-      return false;
+      return null;
     }
+    var eqToken = currentToken();
     nextToken();
-    if (isFatal()) return false;
+    if (isFatal()) return null;
 
-    parseExpr();
-    if (isFatal()) return false;
+    var rhs = parseExpr();
+    if (isFatal()) return null;
 
     consume(TokenKind.Semicolon);
-    return true;
+    if (isFatal()) return null;
+
+    var assign = new AssignNode(eqToken);
+    assign.Children.Add(lhs);
+    assign.Children.Add(rhs);
+    return assign;
   }
 
-  private void parseSubscr()
+  private Node parseSubscr(Node lhs)
   {
+    var token = currentToken();
     nextToken();
-    if (isFatal()) return;
+    if (isFatal()) return Node.Invalid;
 
-    parseExpr();
-    if (isFatal()) return;
+    var rhs = parseExpr();
+    if (isFatal()) return Node.Invalid;
 
     consume(TokenKind.RBracket);
+    if (isFatal()) return Node.Invalid;
+
+    var subscr = new ElementNode(token);
+    subscr.Children.Add(lhs);
+    subscr.Children.Add(rhs);
+    return subscr;
   }
 
-  private void parseIfStmt()
+  private Node parseIfStmt()
   {
+    var token = currentToken();
     nextToken();
-    if (isFatal()) return;
+    if (isFatal()) return Node.Invalid;
 
     consume(TokenKind.LParen);
-    if (isFatal()) return;
+    if (isFatal()) return Node.Invalid;
 
-    parseExpr();
-    if (isFatal()) return;
+    var expr = parseExpr();
+    if (isFatal()) return Node.Invalid;
 
     consume(TokenKind.RParen);
-    if (isFatal()) return;
+    if (isFatal()) return Node.Invalid;
 
-    parseStmt();
-    if (isFatal()) return;
+    var thenStmt = parseStmt();
+    if (isFatal()) return Node.Invalid;
 
-    if (match(TokenKind.ElseKW))
-    {
-      nextToken();
-      if (isFatal()) return;
+    var ifStmt = new IfNode(token);
+    ifStmt.Children.Add(expr);
+    ifStmt.Children.Add(thenStmt);
 
-      parseStmt();
-    }
+    if (!match(TokenKind.ElseKW))
+      return ifStmt;
+
+    nextToken();
+    if (isFatal()) return Node.Invalid;
+
+    var elseStmt = parseStmt();
+    if (isFatal()) return Node.Invalid;
+
+    var ifElseStmt = new IfElseNode(token);
+    ifElseStmt.Children.Add(ifStmt);
+    ifElseStmt.Children.Add(elseStmt);
+
+    return ifElseStmt;
   }
 
-  private void parseWhileStmt()
+  private Node parseWhileStmt()
   {
+    var token = currentToken();
     nextToken();
-    if (isFatal()) return;
+    if (isFatal()) return Node.Invalid;
 
     consume(TokenKind.LParen);
-    if (isFatal()) return;
+    if (isFatal()) return Node.Invalid;
 
-    parseExpr();
-    if (isFatal()) return;
+    var expr = parseExpr();
+    if (isFatal()) return Node.Invalid;
 
     consume(TokenKind.RParen);
-    if (isFatal()) return;
+    if (isFatal()) return Node.Invalid;
 
-    parseStmt();
+    var stmt = parseStmt();
+    if (isFatal()) return Node.Invalid;
+
+    var whileStmt = new WhileNode(token);
+    whileStmt.Children.Add(expr);
+    whileStmt.Children.Add(stmt);
+
+    return whileStmt;
   }
 
-  private void parseDoWhileStmt()
+  private Node parseDoWhileStmt()
   {
+    var token = currentToken();
     nextToken();
-    if (isFatal()) return;
+    if (isFatal()) return Node.Invalid;
 
-    parseStmt();
-    if (isFatal()) return;
+    var stmt = parseStmt();
+    if (isFatal()) return Node.Invalid;
 
     consume(TokenKind.WhileKW);
-    if (isFatal()) return;
+    if (isFatal()) return Node.Invalid;
 
     consume(TokenKind.LParen);
-    if (isFatal()) return;
+    if (isFatal()) return Node.Invalid;
 
-    parseExpr();
-    if (isFatal()) return;
+    var expr = parseExpr();
+    if (isFatal()) return Node.Invalid;
 
     consume(TokenKind.RParen);
-    if (isFatal()) return;
+    if (isFatal()) return Node.Invalid;
 
     consume(TokenKind.Semicolon);
+    if (isFatal()) return Node.Invalid;
+
+    var doWhileStmt = new DoWhileNode(token);
+    doWhileStmt.Children.Add(stmt);
+    doWhileStmt.Children.Add(expr);
+
+    return doWhileStmt;
   }
 
-  private void parseBreakStmt()
+  private Node parseBreakStmt()
   {
+    var token = currentToken();
     nextToken();
+    if (isFatal()) return Node.Invalid;
+
     consume(TokenKind.Semicolon);
+    if (isFatal()) return Node.Invalid;
+
+    return new BreakNode(token);
   }
 
-  private void parseContinueStmt()
+  private Node parseContinueStmt()
   {
+    var token = currentToken();
     nextToken();
+    if (isFatal()) return Node.Invalid;
+
     consume(TokenKind.Semicolon);
+    if (isFatal()) return Node.Invalid;
+
+    return new ContinueNode(token);
   }
 
-  private void parseReturnStmt()
+  private Node parseReturnStmt()
   {
+    var token = currentToken();
     nextToken();
-    if (isFatal()) return;
+    if (isFatal()) return Node.Invalid;
 
+    var ret = new ReturnNode(token);
     if (match(TokenKind.Semicolon))
     {
       nextToken();
-      return;
+      if (isFatal()) return Node.Invalid;
+      return ret; 
     }
 
-    parseExpr();
-    if (isFatal()) return;
+    var expr = parseExpr();
+    if (isFatal()) return Node.Invalid;
 
     consume(TokenKind.Semicolon);
+    if (isFatal()) return Node.Invalid;
+
+    ret.Children.Add(expr);
+    return ret;
   }
 
-  private void parseExprStmt()
+  private Node parseExprStmt()
   {
-    parseExpr();
-    if (isFatal()) return;
+    var expr = parseExpr();
+    if (isFatal()) return Node.Invalid;
 
     consume(TokenKind.Semicolon);
+    if (isFatal()) return Node.Invalid;
+
+    return expr;
   }
 
-  private void parseExpr()
+  private Node parseExpr()
   {
-    parseAndExpr();
-    if (isFatal()) return;
+    var lhs = parseAndExpr();
+    if (isFatal()) return Node.Invalid;
 
     while (match(TokenKind.PipePipe))
     {
+      var token = currentToken();
       nextToken();
-      if (isFatal()) return;
+      if (isFatal()) return Node.Invalid;
 
-      parseAndExpr();
-      if (isFatal()) return;
+      var rhs = parseAndExpr();
+      if (isFatal()) return Node.Invalid;
+
+      var binOp = new AndNode(token);
+      binOp.Children.Add(lhs);
+      binOp.Children.Add(rhs);
+      lhs = binOp;
     }
+
+    return lhs;
   }
 
-  private void parseAndExpr()
+  private Node parseAndExpr()
   {
-    parseEqExpr();
-    if (isFatal()) return;
+    var lhs = parseEqExpr();
+    if (isFatal()) return Node.Invalid;
 
     while (match(TokenKind.AmpAmp))
     {
+      var token = currentToken();
       nextToken();
-      if (isFatal()) return;
+      if (isFatal()) return Node.Invalid;
 
-      parseEqExpr();
-      if (isFatal()) return;
+      var rhs = parseEqExpr();
+      if (isFatal()) return Node.Invalid;
+
+      var binOp = new AndNode(token);
+      binOp.Children.Add(lhs);
+      binOp.Children.Add(rhs);
+      lhs = binOp;
     }
+
+    return lhs;
   }
 
-  private void parseEqExpr()
+  private Node parseEqExpr()
   {
-    parseRelExpr();
-    if (isFatal()) return;
+    var lhs = parseRelExpr();
+    if (isFatal()) return Node.Invalid;
 
     for (;;)
     {
       if (match(TokenKind.EqEq))
       {
+        var token = currentToken();
         nextToken();
-        if (isFatal()) return;
+        if (isFatal()) return Node.Invalid;
 
-        parseRelExpr();
-        if (isFatal()) return;
+        var rhs = parseRelExpr();
+        if (isFatal()) return Node.Invalid;
+
+        var binOp = new EqNode(token);
+        binOp.Children.Add(lhs);
+        binOp.Children.Add(rhs);
+        lhs = binOp;
         continue;
       }
 
       if (match(TokenKind.NotEq))
       {
+        var token = currentToken();
         nextToken();
-        if (isFatal()) return;
+        if (isFatal()) return Node.Invalid;
 
-        parseRelExpr();
-        if (isFatal()) return;
+        var rhs = parseRelExpr();
+        if (isFatal()) return Node.Invalid;
+
+        var binOp = new NotEqNode(token);
+        binOp.Children.Add(lhs);
+        binOp.Children.Add(rhs);
+        lhs = binOp;
         continue;
       }
 
       break;
     }
+
+    return lhs;
   }
 
-  private void parseRelExpr()
+  private Node parseRelExpr()
   {
-    parseAddExpr();
-    if (isFatal()) return;
+    var lhs = parseAddExpr();
+    if (isFatal()) return Node.Invalid;
 
     for (;;)
     {
       if (match(TokenKind.Lt))
       {
+        var token = currentToken();
         nextToken();
-        if (isFatal()) return;
+        if (isFatal()) return Node.Invalid;
 
-        parseAddExpr();
-        if (isFatal()) return;
+        var rhs = parseAddExpr();
+        if (isFatal()) return Node.Invalid;
+
+        var binOp = new LtNode(token);
+        binOp.Children.Add(lhs);
+        binOp.Children.Add(rhs);
+        lhs = binOp;
         continue;
       }
 
       if (match(TokenKind.LtEq))
       {
+        var token = currentToken();
         nextToken();
-        if (isFatal()) return;
+        if (isFatal()) return Node.Invalid;
 
-        parseAddExpr();
-        if (isFatal()) return;
+        var rhs = parseAddExpr();
+        if (isFatal()) return Node.Invalid;
+
+        var binOp = new LeNode(token);
+        binOp.Children.Add(lhs);
+        binOp.Children.Add(rhs);
+        lhs = binOp;
         continue;
       }
 
       if (match(TokenKind.Gt))
       {
+        var token = currentToken();
         nextToken();
-        if (isFatal()) return;
+        if (isFatal()) return Node.Invalid;
 
-        parseAddExpr();
-        if (isFatal()) return;
+        var rhs = parseAddExpr();
+        if (isFatal()) return Node.Invalid;
+
+        var binOp = new GtNode(token);
+        binOp.Children.Add(lhs);
+        binOp.Children.Add(rhs);
+        lhs = binOp;
         continue;
       }
 
       if (match(TokenKind.GtEq))
       {
+        var token = currentToken();
         nextToken();
-        if (isFatal()) return;
+        if (isFatal()) return Node.Invalid;
 
-        parseAddExpr();
-        if (isFatal()) return;
+        var rhs = parseAddExpr();
+        if (isFatal()) return Node.Invalid;
+
+        var binOp = new GeNode(token);
+        binOp.Children.Add(lhs);
+        binOp.Children.Add(rhs);
+        lhs = binOp;
         continue;
       }
 
       break;
     }
+
+    return lhs;
   }
 
-  private void parseAddExpr()
+  private Node parseAddExpr()
   {
-    parseMulExpr();
-    if (isFatal()) return;
+    var lhs = parseMulExpr();
+    if (isFatal()) return Node.Invalid;
 
     for (;;)
     {
       if (match(TokenKind.Plus))
       {
+        var token = currentToken();
         nextToken();
-        if (isFatal()) return;
+        if (isFatal()) return Node.Invalid;
 
-        parseMulExpr();
-        if (isFatal()) return;
+        var rhs = parseMulExpr();
+        if (isFatal()) return Node.Invalid;
+
+        var binOp = new AddNode(token);
+        binOp.Children.Add(lhs);
+        binOp.Children.Add(rhs);
+        lhs = binOp;
         continue;
       }
 
       if (match(TokenKind.Minus))
       {
+        var token = currentToken();
         nextToken();
-        if (isFatal()) return;
+        if (isFatal()) return Node.Invalid;
 
-        parseMulExpr();
-        if (isFatal()) return;
+        var rhs = parseMulExpr();
+        if (isFatal()) return Node.Invalid;
+
+        var binOp = new SubNode(token);
+        binOp.Children.Add(lhs);
+        binOp.Children.Add(rhs);
+        lhs = binOp;
         continue;
       }
 
       break;
     }
+
+    return lhs;
   }
 
-  private void parseMulExpr()
+  private Node parseMulExpr()
   {
-    parseUnaryExpr();
-    if (isFatal()) return;
+    var lhs = parseUnaryExpr();
+    if (isFatal()) return Node.Invalid;
 
     for (;;)
     {
       if (match(TokenKind.Star))
       {
+        var token = currentToken();
         nextToken();
-        if (isFatal()) return;
+        if (isFatal()) return Node.Invalid;
 
-        parseUnaryExpr();
-        if (isFatal()) return;
+        var rhs = parseUnaryExpr();
+        if (isFatal()) return Node.Invalid;
+
+        var binOp = new MulNode(token);
+        binOp.Children.Add(lhs);
+        binOp.Children.Add(rhs);
+        lhs = binOp;
         continue;
       }
     
       if (match(TokenKind.Slash))
       {
+        var token = currentToken();
         nextToken();
-        if (isFatal()) return;
+        if (isFatal()) return Node.Invalid;
 
-        parseUnaryExpr();
-        if (isFatal()) return;
+        var rhs = parseUnaryExpr();
+        if (isFatal()) return Node.Invalid;
+
+        var binOp = new DivNode(token);
+        binOp.Children.Add(lhs);
+        binOp.Children.Add(rhs);
+        lhs = binOp;
         continue;
       }
     
       if (match(TokenKind.Percent))
       {
+        var token = currentToken();
         nextToken();
-        if (isFatal()) return;
+        if (isFatal()) return Node.Invalid;
 
-        parseUnaryExpr();
-        if (isFatal()) return;
+        var rhs = parseUnaryExpr();
+        if (isFatal()) return Node.Invalid;
+
+        var binOp = new ModNode(token);
+        binOp.Children.Add(lhs);
+        binOp.Children.Add(rhs);
+        lhs = binOp;
         continue;
       }
     
       break;
     }
+
+    return lhs;
   }
 
-  private void parseUnaryExpr()
+  private Node parseUnaryExpr()
   {
     if (match(TokenKind.Not))
     {
+      var token = currentToken();
       nextToken();
-      if (isFatal()) return;
+      if (isFatal()) return Node.Invalid;
 
-      parseUnaryExpr();
-      return;
+      var expr = parseUnaryExpr();
+      if (isFatal()) return Node.Invalid;
+
+      var unaryOp = new NotNode(token);
+      unaryOp.Children.Add(expr);
+      return unaryOp;
     }
 
     if (match(TokenKind.Plus))
     {
+      var token = currentToken();
       nextToken();
-      if (isFatal()) return;
+      if (isFatal()) return Node.Invalid;
 
-      parseUnaryExpr();
-      return;
+      var expr = parseUnaryExpr();
+      if (isFatal()) return Node.Invalid;
+
+      var unaryOp = new UnaryPlusNode(token);
+      unaryOp.Children.Add(expr);
+      return unaryOp;
     }
 
     if (match(TokenKind.Minus))
     {
+      var token = currentToken();
       nextToken();
-      if (isFatal()) return;
+      if (isFatal()) return Node.Invalid;
 
-      parseUnaryExpr();
-      return;
+      var expr = parseUnaryExpr();
+      if (isFatal()) return Node.Invalid;
+
+      var unaryOp = new UnaryMinusNode(token);
+      unaryOp.Children.Add(expr);
+      return unaryOp;
     }
 
-    parseCallExpr();
+    return parseCallExpr();
   }
 
-  private void parseCallExpr()
+  private Node parseCallExpr()
   {
-    parsePrimaryExpr();
-    if (isFatal()) return;
+    var lhs = parsePrimaryExpr();
+    if (isFatal()) return Node.Invalid;
 
     for (;;)
     {
       if (match(TokenKind.LBracket))
       {
-        parseSubscr();
-        if (isFatal()) return;
+        var rhs = parseSubscr(lhs);
+        if (isFatal()) return Node.Invalid;
+        lhs = rhs;
         continue;
       }
 
       if (match(TokenKind.LParen))
       {
-        parseCall();
-        if (isFatal()) return;
+        var rhs = parseCall(lhs);
+        if (isFatal()) return Node.Invalid;
+        lhs = rhs;
         continue;
       }
 
       break;
     }
+
+    return lhs;
   }
 
-  private void parseCall()
+  private Node parseCall(Node lhs)
   {
+    var token = currentToken();
     nextToken();
-    if (isFatal()) return;
+    if (isFatal()) return Node.Invalid;
+
+    var call = new CallNode(token);
+    call.Children.Add(lhs);
 
     if (match(TokenKind.RParen))
     {
       nextToken();
-      return;
+      if (isFatal()) return Node.Invalid;
+      return call;
     }
 
-    parseExpr();
-    if (isFatal()) return;
+    var expr = parseExpr();
+    if (isFatal()) return Node.Invalid;
+    call.Children.Add(expr);
 
     while (match(TokenKind.Comma))
     {
       nextToken();
-      if (isFatal()) return;
+      if (isFatal()) return Node.Invalid;
 
-      parseExpr();
-      if (isFatal()) return;
+      expr = parseExpr();
+      if (isFatal()) return Node.Invalid;
+      call.Children.Add(expr);
     }
 
     consume(TokenKind.RParen);
+    if (isFatal()) return Node.Invalid;
+
+    return call;
   }
 
-  private void parsePrimaryExpr()
+  private Node parsePrimaryExpr()
   {
     if (match(TokenKind.IntLiteral))
     {
+      var token = currentToken();
       nextToken();
-      return;
+      if (isFatal()) return Node.Invalid;
+      return new IntNode(token);
     }
 
     if (match(TokenKind.FloatLiteral))
     {
+      var token = currentToken();
       nextToken();
-      return;
+      if (isFatal()) return Node.Invalid;
+      return new FloatNode(token);
     }
 
     if (match(TokenKind.CharLiteral))
     {
+      var token = currentToken();
       nextToken();
-      return;
+      if (isFatal()) return Node.Invalid;
+      return new CharNode(token);
     }
 
     if (match(TokenKind.StringLiteral))
     {
+      var token = currentToken();
       nextToken();
-      return;
+      if (isFatal()) return Node.Invalid;
+      return new StringNode(token);
     }
 
     if (match(TokenKind.LBracket))
-    {
-      parseArray();
-      return;
-    }
+      return parseArray();
 
     if (match(TokenKind.Ident))
     {
+      var token = currentToken();
       nextToken();
-      return;
+      if (isFatal()) return Node.Invalid;
+      return new IdentNode(token);
     }
 
     if (match(TokenKind.LParen))
     {
       nextToken();
-      if (isFatal()) return;
+      if (isFatal()) return Node.Invalid;
 
-      parseExpr();
-      if (isFatal()) return;
+      var expr = parseExpr();
+      if (isFatal()) return Node.Invalid;
 
       consume(TokenKind.RParen);
-      return;
+      if (isFatal()) return Node.Invalid;
+
+      return expr;
     }
 
     reportUnexpectedToken();
+    return Node.Invalid;
   }
 
-  private void parseArray()
+  private Node parseArray()
   {
+    var token = currentToken();
     nextToken();
-    if (isFatal()) return;
+    if (isFatal()) return Node.Invalid;
+
+    var array = new ArrayNode(token);
 
     if (match(TokenKind.RBracket))
     {
       nextToken();
-      return;
+      if (isFatal()) return Node.Invalid;
+      return array;
     }
 
-    parseExpr();
-    if (isFatal()) return;
+    var expr = parseExpr();
+    if (isFatal()) return Node.Invalid;
+    array.Children.Add(expr);
 
     while (match(TokenKind.Comma))
     {
       nextToken();
-      if (isFatal()) return;
+      if (isFatal()) return Node.Invalid;
 
-      parseExpr();
-      if (isFatal()) return;
+      expr = parseExpr();
+      if (isFatal()) return Node.Invalid;
+      array.Children.Add(expr);
     }
 
     consume(TokenKind.RBracket);
+    if (isFatal()) return Node.Invalid;
+
+    return array;
   }
 }

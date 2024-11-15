@@ -16,8 +16,6 @@ abstract public class NonLeafNode : Node
       return;
     }
 
-    Console.WriteLine();
-
     foreach (var child in Children)
     {
       child.Print(depth + 1);

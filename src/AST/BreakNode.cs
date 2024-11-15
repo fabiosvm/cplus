@@ -1,5 +1,5 @@
 
-public class BreakNode : NonLeafNode
+public class BreakNode : LeafNode
 {
   public override Token Token { get; }
   public override string Name { get; } = "Break";

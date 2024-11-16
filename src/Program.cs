@@ -8,10 +8,7 @@ internal static class Program
     var path = args[0];
     var source = loadSource(path);
 
-    var (diagnostics, ast) = parse(source);
-
-    diagnostics.Print();
-    ast.Print(0);
+    compile(source);
 
     return 0;
   }
@@ -38,13 +35,22 @@ internal static class Program
 
   private static string loadSource(string path)
   {
-    return File.ReadAllText(path);
+    string source = "";
+    try {
+      source = File.ReadAllText(path);
+    } catch (FileNotFoundException) {
+      printError($"File not found: {path}");
+      Environment.Exit(1);
+    }
+    return source;
   }
 
-  private static (Diagnostics, Node) parse(string source)
+  private static void compile(string source)
   {
     var parser = new Parser(source);
     parser.Parse();
-    return (parser.Diagnostics, parser.Ast);
+
+    parser.Diagnostics.Print();
+    parser.Ast.Print(0);
   }
 }

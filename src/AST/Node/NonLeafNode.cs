@@ -1,12 +1,10 @@
 
 abstract public class NonLeafNode : Node
 {
-  public abstract Token Token { get; }
-  public bool IsLeaf { get; } = false;
-  public abstract string Name { get; }
+  public override bool IsLeaf { get; } = false;
   public List<Node> Children { get; protected set; } = new List<Node>();
 
-  public void Print(int depth)
+  public override void Print(int depth)
   {
     Console.WriteLine($"{new string(' ', depth * 2)}{Name}:");
 
@@ -17,8 +15,6 @@ abstract public class NonLeafNode : Node
     }
 
     foreach (var child in Children)
-    {
       child.Print(depth + 1);
-    }
   }
 }

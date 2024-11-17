@@ -18,6 +18,7 @@ public class Binder
   public void Bind()
   {
     visitor.Visit(Ast);
+    reportLocalSymbolsDefinedButNotUsed();
   }
 
   private void registerActions()
@@ -119,5 +120,22 @@ public class Binder
   private void exitBlockNode(Node node)
   {
     SymbolTable.ExitScope();
+  }
+
+  private void reportLocalSymbolsDefinedButNotUsed()
+  {
+    foreach (var symbol in SymbolTable.Symbols)
+    {
+      if (symbol.IsGlobal) continue;
+      if (symbol.Used > 0) continue;
+
+      var kind = symbol.Kind;
+      var name = symbol.Name;
+      var ident = symbol.Ident;
+      var line = ident.Line;
+      var column = ident.Column;
+
+      Diagnostics.Report(MessageKind.Warning, $"Local {kind} '{name}' defined but not used [{line}:{column}]");
+    }
   }
 }

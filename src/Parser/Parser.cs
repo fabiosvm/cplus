@@ -374,7 +374,7 @@ public class Parser
     nextToken();
     if (isFatal()) return null;
 
-    Node lhs = new IdentNode(identToken);
+    Node lhs = new SymbolNode(identToken);
 
     while (match(TokenKind.LBracket))
     {
@@ -1003,7 +1003,7 @@ public class Parser
       var token = currentToken();
       nextToken();
       if (isFatal()) return Node.None;
-      return new IdentNode(token);
+      return new SymbolNode(token);
     }
 
     if (match(TokenKind.LParen))

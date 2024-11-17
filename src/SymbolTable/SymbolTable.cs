@@ -1,7 +1,7 @@
 
 public class SymbolTable
 {
-  public Dictionary<string, Symbol> Symbols = new Dictionary<string, Symbol>();
+  public List<Symbol> Symbols = new List<Symbol>();
   private int scopeDepth { get; set; } = 0;
   private int nextIndex = 0;
 
@@ -15,29 +15,39 @@ public class SymbolTable
     scopeDepth--;
   }
 
-  public Symbol? Define(Token ident, SymbolKind kind)
+  public (bool, Symbol?) Define(Token ident, SymbolKind kind)
   {
     var name = ident.Lexeme;
 
-    if (Symbols.ContainsKey(name))
-      return null;
+    for (var i = Symbols.Count - 1; i > -1; i--)
+    {
+      var existing = Symbols[i];
+      if (existing.Depth < scopeDepth) break;
+      if (existing.Name != name) continue;
+      return (false, existing);
+    }
 
     var symbol = new Symbol(ident, kind, scopeDepth, nextIndex);
-    Symbols[name] = symbol;
-    nextIndex++;
+    Symbols.Add(symbol);
 
-    return symbol;
+    nextIndex++;
+    return (true, symbol);
   }
 
   public Symbol? Resolve(Token ident)
   {
     var name = ident.Lexeme;
-    Symbol? symbol;
+    Symbol? symbol = null;
 
-    if (!Symbols.TryGetValue(name, out symbol))
-      return null;
+    for (var i = Symbols.Count - 1; i > -1; i--)
+    {
+      var existing = Symbols[i];
+      if (existing.Name != name) continue;
+      symbol = existing;
+    }
 
-    symbol.Used++;
+    if (symbol != null) symbol.Used++;
+
     return symbol;
   }
 }

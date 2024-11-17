@@ -50,7 +50,10 @@ internal static class Program
     var parser = new Parser(source);
     parser.Parse();
 
-    parser.Diagnostics.Print();
-    parser.Ast.Print(0);
+    var binder = new Binder(parser.Ast, parser.Diagnostics);
+    binder.Bind();
+
+    binder.Diagnostics.Print();
+    binder.Ast.Print(0);
   }
 }

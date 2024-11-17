@@ -1,7 +1,6 @@
 
 abstract public class NonLeafNode : Node
 {
-  public override bool IsLeaf { get; } = false;
   public List<Node> Children { get; protected set; } = new List<Node>();
 
   public override void Print(int depth)

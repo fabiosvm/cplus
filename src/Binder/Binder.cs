@@ -24,13 +24,15 @@ public class Binder
   private void registerActions()
   {
     visitor.RegisterEnterAction<VarDeclNode>(enterVarDeclNode);
-    visitor.RegisterEnterAction<FuncDeclNode>(enterFuncDeclNode);
     visitor.RegisterEnterAction<ParamNode>(enterParamNode);
 
+    visitor.RegisterEnterAction<FuncDeclNode>(enterFuncDeclNode);
+    visitor.RegisterExitAction<FuncDeclNode>(exitFuncDeclNode);
+
     visitor.RegisterEnterAction<SymbolNode>(enterSymbolNode);
-  
-    visitor.RegisterEnterAction<BlockNode>(enterBlockNode);
-    visitor.RegisterExitAction<BlockNode>(exitBlockNode);
+
+    visitor.RegisterEnterAction<ScopeBlockNode>(enterScopeBlockNode);
+    visitor.RegisterExitAction<ScopeBlockNode>(exitScopeBlockNode);
   }
 
   private void enterVarDeclNode(Node node)
@@ -50,27 +52,7 @@ public class Binder
     var kind = symbol?.Kind;
     line = symbol?.Ident.Line ?? -1;
     column = symbol?.Ident.Column ?? -1;
-    Diagnostics.Report(MessageKind.Note, $"There a {kind} with the same name [{line}:{column}]");
-  }
-
-  private void enterFuncDeclNode(Node node)
-  {
-    var funcDeclNode = (FuncDeclNode) node;
-    var identNode = funcDeclNode.Children[1];
-    var ident = identNode.Token;
-
-    var (defined, symbol) = SymbolTable.Define(ident, SymbolKind.Function);
-    if (defined) return;
-
-    var name = ident.Lexeme;
-    var line = ident.Line;
-    var column = ident.Column;
-    Diagnostics.Report(MessageKind.Error, $"Cannot define function with name '{name}' [{line}:{column}]");
-
-    var kind = symbol?.Kind;
-    line = symbol?.Ident.Line ?? -1;
-    column = symbol?.Ident.Column ?? -1;
-    Diagnostics.Report(MessageKind.Note, $"There a {kind} with the same name [{line}:{column}]");
+    Diagnostics.Report(MessageKind.Note, $"There is a {kind} with the same name [{line}:{column}]");
   }
 
   private void enterParamNode(Node node)
@@ -79,7 +61,7 @@ public class Binder
     var identNode = paramNode.Children[1];
     var ident = identNode.Token;
 
-    var (defined, symbol) = SymbolTable.Define(ident, SymbolKind.Variable);
+    var (defined, symbol) = SymbolTable.Define(ident, SymbolKind.Parameter);
     if (defined) return;
 
     var name = ident.Lexeme;
@@ -90,7 +72,36 @@ public class Binder
     var kind = symbol?.Kind;
     line = symbol?.Ident.Line ?? -1;
     column = symbol?.Ident.Column ?? -1;
-    Diagnostics.Report(MessageKind.Note, $"There a {kind} with the same name [{line}:{column}]");
+    Diagnostics.Report(MessageKind.Note, $"There is a {kind} with the same name [{line}:{column}]");
+  }
+
+  private void enterFuncDeclNode(Node node)
+  {
+    var funcDeclNode = (FuncDeclNode) node;
+    var identNode = funcDeclNode.Children[1];
+    var ident = identNode.Token;
+
+    var (defined, symbol) = SymbolTable.Define(ident, SymbolKind.Function);
+
+    if (!defined)
+    {
+      var name = ident.Lexeme;
+      var line = ident.Line;
+      var column = ident.Column;
+      Diagnostics.Report(MessageKind.Error, $"Cannot define function with name '{name}' [{line}:{column}]");
+
+      var kind = symbol?.Kind;
+      line = symbol?.Ident.Line ?? -1;
+      column = symbol?.Ident.Column ?? -1;
+      Diagnostics.Report(MessageKind.Note, $"There is a {kind} with the same name [{line}:{column}]");
+    }
+
+    SymbolTable.EnterScope();
+  }
+
+  private void exitFuncDeclNode(Node node)
+  {
+    SymbolTable.ExitScope();
   }
 
   private void enterSymbolNode(Node node)
@@ -112,12 +123,12 @@ public class Binder
     annotateSymbol(node, new SymbolAnnotation(symbol));
   }
 
-  private void enterBlockNode(Node node)
+  private void enterScopeBlockNode(Node node)
   {
     SymbolTable.EnterScope();
   }
 
-  private void exitBlockNode(Node node)
+  private void exitScopeBlockNode(Node node)
   {
     SymbolTable.ExitScope();
   }

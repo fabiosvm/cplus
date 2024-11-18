@@ -44,6 +44,7 @@ public class SymbolTable
       var existing = Symbols[i];
       if (existing.Name != name) continue;
       symbol = existing;
+      break;
     }
 
     if (symbol != null) symbol.Used++;

@@ -220,7 +220,7 @@ public class Parser
       reportUnexpectedToken();
       return Node.None;
     }
-    var block = parseBlock();
+    var block = parseBlock(false);
     if (isFatal()) return Node.None;
 
     var ident = new IdentNode(identToken);
@@ -309,13 +309,13 @@ public class Parser
     return param;
   }
 
-  private Node parseBlock()
+  private Node parseBlock(bool scoped)
   {
     var token = currentToken();
     nextToken();
     if (isFatal()) return Node.None;
 
-    var block = new BlockNode(token);
+    NonLeafNode block = scoped ? new ScopeBlockNode(token) : new BlockNode(token);
 
     while (!match(TokenKind.RBrace))
     {
@@ -361,7 +361,7 @@ public class Parser
       return parseReturnStmt();
 
     if (match(TokenKind.LBrace))
-      return parseBlock();
+      return parseBlock(true);
 
     return parseExprStmt();
   }

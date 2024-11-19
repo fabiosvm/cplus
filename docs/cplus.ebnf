@@ -7,7 +7,7 @@ var_decl                  ::= "var" type IDENT ( "=" expr )? ";"
 
 type                      ::= primitive_type ( "[" "]" )*
 
-primitive_type            ::= "char" | "short" | "int" | "long"
+primitive_type            ::= "bool" | "char" | "short" | "int" | "long"
                             | "float" | "double"
 
 func_decl                 ::= "func" ret_type IDENT param_list block
@@ -67,7 +67,7 @@ call_expr                 ::= primary_expr ( subscr | call )*
 
 call                      ::= "(" ( expr ( "," expr )* )? ")"
 
-primary_expr              ::= INT | FLOAT | CHAR | STRING
+primary_expr              ::= "false" | "true" | INT | FLOAT | CHAR | STRING
                             | array
                             | IDENT
                             | "(" expr ")"

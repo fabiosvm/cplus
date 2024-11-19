@@ -142,6 +142,14 @@ public class Parser
 
   private Node parsePrimitiveType()
   {
+    if (match(TokenKind.BoolKW))
+    {
+      var token = currentToken();
+      nextToken();
+      if (isFatal()) return Node.None;
+      return new BoolTypeNode(token);
+    }
+
     if (match(TokenKind.CharKW))
     {
       var token = currentToken();
@@ -963,6 +971,22 @@ public class Parser
 
   private Node parsePrimaryExpr()
   {
+    if (match(TokenKind.FalseKW))
+    {
+      var token = currentToken();
+      nextToken();
+      if (isFatal()) return Node.None;
+      return new FalseNode(token);
+    }
+
+    if (match(TokenKind.TrueKW))
+    {
+      var token = currentToken();
+      nextToken();
+      if (isFatal()) return Node.None;
+      return new TrueNode(token);
+    }
+
     if (match(TokenKind.IntLiteral))
     {
       var token = currentToken();

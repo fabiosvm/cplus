@@ -33,12 +33,14 @@
 | FloatLiteral | `[0-9]+\.[0-9]+` |
 | CharLiteral | `'.'` |
 | StringLiteral | `".*"` |
+| BoolKW | `bool` |
 | BreakKW | `break` |
 | CharKW | `char` |
 | ContinueKW | `continue` |
 | DoKW | `do` |
 | DoubleKW | `double` |
 | ElseKW | `else` |
+| FalseKW | `false` |
 | FloatKW | `float` |
 | FuncKW | `func` |
 | IfKW | `if` |
@@ -46,6 +48,7 @@
 | LongKW | `long` |
 | ReturnKW | `return` |
 | ShortKW | `short` |
+| TrueKW | `true` |
 | VarKW | `var` |
 | VoidKW | `void` |
 | WhileKW | `while` |

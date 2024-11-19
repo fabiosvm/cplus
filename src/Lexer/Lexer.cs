@@ -49,12 +49,14 @@ public class Lexer
     if (matchNumberLiteral()) return;
     if (matchCharLiteral()) return;
     if (matchStringLiteral()) return;
+    if (matchKeyword("bool", TokenKind.BoolKW)) return;
     if (matchKeyword("break", TokenKind.BreakKW)) return;
     if (matchKeyword("char", TokenKind.CharKW)) return;
     if (matchKeyword("continue", TokenKind.ContinueKW)) return;
     if (matchKeyword("do", TokenKind.DoKW)) return;
     if (matchKeyword("double", TokenKind.DoubleKW)) return;
     if (matchKeyword("else", TokenKind.ElseKW)) return;
+    if (matchKeyword("false", TokenKind.FalseKW)) return;
     if (matchKeyword("float", TokenKind.FloatKW)) return;
     if (matchKeyword("func", TokenKind.FuncKW)) return;
     if (matchKeyword("if", TokenKind.IfKW)) return;
@@ -62,6 +64,7 @@ public class Lexer
     if (matchKeyword("long", TokenKind.LongKW)) return;
     if (matchKeyword("return", TokenKind.ReturnKW)) return;
     if (matchKeyword("short", TokenKind.ShortKW)) return;
+    if (matchKeyword("true", TokenKind.TrueKW)) return;
     if (matchKeyword("var", TokenKind.VarKW)) return;
     if (matchKeyword("void", TokenKind.VoidKW)) return;
     if (matchKeyword("while", TokenKind.WhileKW)) return;

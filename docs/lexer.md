@@ -16,6 +16,7 @@
 | RBrace | `}` |
 | PipePipe | `\|\|` |
 | AmpAmp | `&&` |
+| Amp | `&` |
 | EqEq | `==` |
 | Eq | `=` |
 | LtEq | `<=` |
@@ -44,6 +45,7 @@
 | FloatKW | `float` |
 | FuncKW | `func` |
 | IfKW | `if` |
+| InoutKW | `inout` |
 | IntKW | `int` |
 | LongKW | `long` |
 | ReturnKW | `return` |

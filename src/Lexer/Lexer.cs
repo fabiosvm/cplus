@@ -33,6 +33,7 @@ public class Lexer
     if (matchChar('}', TokenKind.RBrace)) return;
     if (matchChars("||", TokenKind.PipePipe)) return;
     if (matchChars("&&", TokenKind.AmpAmp)) return;
+    if (matchChar('&', TokenKind.Amp)) return;
     if (matchChars("==", TokenKind.EqEq)) return;
     if (matchChar('=', TokenKind.Eq)) return;
     if (matchChars("<=", TokenKind.LtEq)) return;
@@ -60,6 +61,7 @@ public class Lexer
     if (matchKeyword("float", TokenKind.FloatKW)) return;
     if (matchKeyword("func", TokenKind.FuncKW)) return;
     if (matchKeyword("if", TokenKind.IfKW)) return;
+    if (matchKeyword("inout", TokenKind.InoutKW)) return;
     if (matchKeyword("int", TokenKind.IntKW)) return;
     if (matchKeyword("long", TokenKind.LongKW)) return;
     if (matchKeyword("return", TokenKind.ReturnKW)) return;

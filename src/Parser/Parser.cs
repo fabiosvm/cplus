@@ -297,6 +297,15 @@ public class Parser
 
   private Node parseParam()
   {
+    Node inout = Node.None;
+    if (match(TokenKind.InoutKW))
+    {
+      var token = currentToken();
+      nextToken();
+      if (isFatal()) return Node.None;
+      inout = new InoutNode(token);
+    }
+
     var type = parseType();
     if (isFatal()) return Node.None;
 
@@ -311,6 +320,7 @@ public class Parser
 
     var ident = new IdentNode(identToken);
     var param = new ParamNode(identToken);
+    param.Children.Add(inout);
     param.Children.Add(type);
     param.Children.Add(ident);
 
@@ -1022,6 +1032,9 @@ public class Parser
     if (match(TokenKind.LBracket))
       return parseArray();
 
+    if (match(TokenKind.Amp))
+      return parseRef();
+
     if (match(TokenKind.Ident))
     {
       var token = currentToken();
@@ -1081,5 +1094,34 @@ public class Parser
     if (isFatal()) return Node.None;
 
     return array;
+  }
+
+  private Node parseRef()
+  {
+    var refToken = currentToken();
+    nextToken();
+    if (isFatal()) return Node.None;
+
+    if (!match(TokenKind.Ident))
+    {
+      reportUnexpectedToken();
+      return Node.None;
+    }
+    var identToken = currentToken();
+    nextToken();
+    if (isFatal()) return Node.None;
+
+    Node lhs = new SymbolNode(identToken);
+
+    while (match(TokenKind.LBracket))
+    {
+      var subscr = parseSubscr(lhs);
+      if (isFatal()) return Node.None;
+      lhs = subscr;
+    }
+
+    var refNode = new RefNode(refToken);
+    refNode.Children.Add(lhs);
+    return refNode;
   }
 }

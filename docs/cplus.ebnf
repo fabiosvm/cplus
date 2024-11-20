@@ -16,7 +16,7 @@ ret_type                  ::= "void" | type
 
 param_list                ::= "(" ( param ( "," param )* )? ")"
 
-param                     ::= type IDENT
+param                     ::= "inout"? type IDENT
 
 block                     ::= "{" stmt* "}"
 
@@ -69,7 +69,10 @@ call                      ::= "(" ( expr ( "," expr )* )? ")"
 
 primary_expr              ::= "false" | "true" | INT | FLOAT | CHAR | STRING
                             | array
+                            | ref
                             | IDENT
                             | "(" expr ")"
 
 array                     ::= "[" ( expr ( "," expr )* )? "]"
+
+ref                       ::= "&" IDENT subscr*

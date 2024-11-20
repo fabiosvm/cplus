@@ -58,7 +58,7 @@ public class Binder
   private void enterParamNode(Node node)
   {
     var paramNode = (ParamNode) node;
-    var identNode = paramNode.Children[1];
+    var identNode = paramNode.Children[2];
     var ident = identNode.Token;
 
     var (defined, symbol) = SymbolTable.Define(ident, SymbolKind.Parameter);

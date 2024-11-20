@@ -42,7 +42,13 @@ public class Binder
     var ident = identNode.Token;
 
     var (defined, symbol) = SymbolTable.Define(ident, SymbolKind.Variable);
-    if (defined) return;
+
+    if (defined)
+    {
+      var annotation = new SymbolAnnotation(symbol);
+      annotateSymbol(node, annotation);
+      return;
+    }
 
     var name = ident.Lexeme;
     var line = ident.Line;
@@ -62,7 +68,13 @@ public class Binder
     var ident = identNode.Token;
 
     var (defined, symbol) = SymbolTable.Define(ident, SymbolKind.Parameter);
-    if (defined) return;
+
+    if (defined)
+    {
+      var annotation = new SymbolAnnotation(symbol);
+      annotateSymbol(node, annotation);
+      return;
+    }
 
     var name = ident.Lexeme;
     var line = ident.Line;
@@ -83,20 +95,24 @@ public class Binder
 
     var (defined, symbol) = SymbolTable.Define(ident, SymbolKind.Function);
 
-    if (!defined)
+    if (defined)
     {
-      var name = ident.Lexeme;
-      var line = ident.Line;
-      var column = ident.Column;
-      Diagnostics.Report(MessageKind.Error, $"Cannot define function with name '{name}' [{line}:{column}]");
+      var annotation = new SymbolAnnotation(symbol);
+      annotateSymbol(node, annotation);
 
-      var kind = symbol?.Kind;
-      line = symbol?.Ident.Line ?? -1;
-      column = symbol?.Ident.Column ?? -1;
-      Diagnostics.Report(MessageKind.Note, $"There is a {kind} with the same name [{line}:{column}]");
+      SymbolTable.EnterScope();
+      return;
     }
 
-    SymbolTable.EnterScope();
+    var name = ident.Lexeme;
+    var line = ident.Line;
+    var column = ident.Column;
+    Diagnostics.Report(MessageKind.Error, $"Cannot define function with name '{name}' [{line}:{column}]");
+
+    var kind = symbol?.Kind;
+    line = symbol?.Ident.Line ?? -1;
+    column = symbol?.Ident.Column ?? -1;
+    Diagnostics.Report(MessageKind.Note, $"There is a {kind} with the same name [{line}:{column}]");
   }
 
   private void exitFuncDeclNode(Node node)

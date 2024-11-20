@@ -15,7 +15,7 @@ public class SymbolTable
     scopeDepth--;
   }
 
-  public (bool, Symbol?) Define(Token ident, SymbolKind kind)
+  public (bool, Symbol) Define(Token ident, SymbolKind kind)
   {
     var name = ident.Lexeme;
 

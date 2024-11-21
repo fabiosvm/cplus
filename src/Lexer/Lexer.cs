@@ -70,6 +70,7 @@ public class Lexer
     if (matchKeyword("return", TokenKind.ReturnKW)) return;
     if (matchKeyword("short", TokenKind.ShortKW)) return;
     if (matchKeyword("true", TokenKind.TrueKW)) return;
+    if (matchKeyword("unsigned", TokenKind.UnsignedKW)) return;
     if (matchKeyword("var", TokenKind.VarKW)) return;
     if (matchKeyword("void", TokenKind.VoidKW)) return;
     if (matchKeyword("while", TokenKind.WhileKW)) return;

@@ -150,6 +150,41 @@ public class Parser
       return new BoolTypeNode(token);
     }
 
+    if (match(TokenKind.FloatKW))
+    {
+      var token = currentToken();
+      nextToken();
+      if (isFatal()) return Node.None;
+      return new FloatTypeNode(token);
+    }
+
+    if (match(TokenKind.DoubleKW))
+    {
+      var token = currentToken();
+      nextToken();
+      if (isFatal()) return Node.None;
+      return new DoubleTypeNode(token);
+    }
+
+    if (match(TokenKind.UnsignedKW))
+    {
+      var token = currentToken();
+      nextToken();
+      if (isFatal()) return Node.None;
+
+      var intType = parseIntType();
+      if (isFatal()) return Node.None;
+
+      var unsignedType = new UnsignedTypeNode(token);
+      unsignedType.Children.Add(intType);
+      return unsignedType;
+    }
+
+    return parseIntType();
+  }
+
+  private Node parseIntType()
+  {
     if (match(TokenKind.CharKW))
     {
       var token = currentToken();
@@ -180,22 +215,6 @@ public class Parser
       nextToken();
       if (isFatal()) return Node.None;
       return new LongTypeNode(token);
-    }
-
-    if (match(TokenKind.FloatKW))
-    {
-      var token = currentToken();
-      nextToken();
-      if (isFatal()) return Node.None;
-      return new FloatTypeNode(token);
-    }
-
-    if (match(TokenKind.DoubleKW))
-    {
-      var token = currentToken();
-      nextToken();
-      if (isFatal()) return Node.None;
-      return new DoubleTypeNode(token);
     }
 
     reportUnexpectedToken();

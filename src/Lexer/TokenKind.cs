@@ -51,6 +51,7 @@ public enum TokenKind
   ReturnKW,
   ShortKW,
   TrueKW,
+  UnsignedKW,
   VarKW,
   VoidKW,
   WhileKW,

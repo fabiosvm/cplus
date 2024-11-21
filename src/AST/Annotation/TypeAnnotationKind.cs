@@ -6,6 +6,10 @@ public enum TypeAnnotationKind
   Short,
   Int,
   Long,
+  UnsignedChar,
+  UnsignedShort,
+  UnsignedInt,
+  UnsignedLong,
   Float,
   Double,
   Array

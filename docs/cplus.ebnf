@@ -7,8 +7,12 @@ var_decl                  ::= "var" type IDENT ( "=" expr )? ";"
 
 type                      ::= primitive_type ( "[" "]" )*
 
-primitive_type            ::= "bool" | "char" | "short" | "int" | "long"
+primitive_type            ::= "bool"
                             | "float" | "double"
+                            | "unsigned" int_type
+                            | int_type
+
+int_type                  ::= "char" | "short" | "int" | "long"
 
 func_decl                 ::= "func" ret_type IDENT param_list block
 

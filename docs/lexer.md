@@ -54,6 +54,7 @@
 | ReturnKW | `return` |
 | ShortKW | `short` |
 | TrueKW | `true` |
+| UnsignedKW | `unsigned` |
 | VarKW | `var` |
 | VoidKW | `void` |
 | WhileKW | `while` |

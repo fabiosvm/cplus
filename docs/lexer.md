@@ -23,8 +23,8 @@
 | Lt | `<` |
 | GtEq | `>=` |
 | Gt | `>` |
-| NotEq | `!=` |
-| Not | `!` |
+| BangEq | `!=` |
+| Bang | `!` |
 | Plus | `+` |
 | Minus | `-` |
 | Star | `*` |
@@ -43,8 +43,10 @@
 | ElseKW | `else` |
 | FalseKW | `false` |
 | FloatKW | `float` |
+| ForKW | `for` |
 | FuncKW | `func` |
 | IfKW | `if` |
+| InKW | `in` |
 | InoutKW | `inout` |
 | IntKW | `int` |
 | LongKW | `long` |

@@ -369,6 +369,9 @@ public class Parser
     if (match(TokenKind.DoKW))
       return parseDoWhileStmt();
 
+    if (match(TokenKind.ForKW))
+      return parseForStmt();
+
     if (match(TokenKind.BreakKW))
       return parseBreakStmt();
 
@@ -534,6 +537,52 @@ public class Parser
     return doWhileStmt;
   }
 
+  private Node parseForStmt()
+  {
+    var token = currentToken();
+    nextToken();
+    if (isFatal()) return Node.None;
+
+    consume(TokenKind.LParen);
+    if (isFatal()) return Node.None;
+
+    var type = parseType();
+    if (isFatal()) return Node.None;
+
+    if (!match(TokenKind.Ident))
+    {
+      reportUnexpectedToken();
+      return Node.None;
+    }
+    var identToken = currentToken();
+    nextToken();
+    if (isFatal()) return Node.None;
+
+    var ident = new IdentNode(identToken);
+    var varDecl = new VarDeclNode(token);
+    varDecl.Children.Add(type);
+    varDecl.Children.Add(ident);
+
+    consume(TokenKind.InKW);
+    if (isFatal()) return Node.None;
+
+    var expr = parseExpr();
+    if (isFatal()) return Node.None;
+
+    consume(TokenKind.RParen);
+    if (isFatal()) return Node.None;
+
+    var stmt = parseStmt();
+    if (isFatal()) return Node.None;
+
+    var forStmt = new ForNode(token);
+    forStmt.Children.Add(varDecl);
+    forStmt.Children.Add(expr);
+    forStmt.Children.Add(stmt);
+
+    return forStmt;
+  }
+
   private Node parseBreakStmt()
   {
     var token = currentToken();
@@ -662,7 +711,7 @@ public class Parser
         continue;
       }
 
-      if (match(TokenKind.NotEq))
+      if (match(TokenKind.BangEq))
       {
         var token = currentToken();
         nextToken();
@@ -869,7 +918,7 @@ public class Parser
 
   private Node parseUnaryExpr()
   {
-    if (match(TokenKind.Not))
+    if (match(TokenKind.Bang))
     {
       var token = currentToken();
       nextToken();

@@ -29,6 +29,9 @@ public class Binder
     visitor.RegisterEnterAction<FuncDeclNode>(enterFuncDeclNode);
     visitor.RegisterExitAction<FuncDeclNode>(exitFuncDeclNode);
 
+    visitor.RegisterEnterAction<ForNode>(enterForNode);
+    visitor.RegisterExitAction<ForNode>(exitForNode);
+
     visitor.RegisterEnterAction<SymbolNode>(enterSymbolNode);
 
     visitor.RegisterEnterAction<ScopeBlockNode>(enterScopeBlockNode);
@@ -113,6 +116,16 @@ public class Binder
     line = symbol?.Ident.Line ?? -1;
     column = symbol?.Ident.Column ?? -1;
     Diagnostics.Report(MessageKind.Note, $"There is a {kind} with the same name [{line}:{column}]");
+  }
+
+  private void enterForNode(Node node)
+  {
+    SymbolTable.EnterScope();
+  }
+
+  private void exitForNode(Node node)
+  {
+    SymbolTable.ExitScope();
   }
 
   private void exitFuncDeclNode(Node node)

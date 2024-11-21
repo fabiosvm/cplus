@@ -40,8 +40,8 @@ public class Lexer
     if (matchChar('<', TokenKind.Lt)) return;
     if (matchChars(">=", TokenKind.GtEq)) return;
     if (matchChar('>', TokenKind.Gt)) return;
-    if (matchChars("!=", TokenKind.NotEq)) return;
-    if (matchChar('!', TokenKind.Not)) return;
+    if (matchChars("!=", TokenKind.BangEq)) return;
+    if (matchChar('!', TokenKind.Bang)) return;
     if (matchChar('+', TokenKind.Plus)) return;
     if (matchChar('-', TokenKind.Minus)) return;
     if (matchChar('*', TokenKind.Star)) return;
@@ -59,8 +59,10 @@ public class Lexer
     if (matchKeyword("else", TokenKind.ElseKW)) return;
     if (matchKeyword("false", TokenKind.FalseKW)) return;
     if (matchKeyword("float", TokenKind.FloatKW)) return;
+    if (matchKeyword("for", TokenKind.ForKW)) return;
     if (matchKeyword("func", TokenKind.FuncKW)) return;
     if (matchKeyword("if", TokenKind.IfKW)) return;
+    if (matchKeyword("in", TokenKind.InKW)) return;
     if (matchKeyword("inout", TokenKind.InoutKW)) return;
     if (matchKeyword("int", TokenKind.IntKW)) return;
     if (matchKeyword("long", TokenKind.LongKW)) return;

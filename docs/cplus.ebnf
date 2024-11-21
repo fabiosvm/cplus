@@ -25,6 +25,7 @@ stmt                      ::= var_decl
                             | if_stmt
                             | while_stmt
                             | do_while_stmt
+                            | for_stmt
                             | break_stmt
                             | continue_stmt
                             | return_stmt
@@ -40,6 +41,8 @@ if_stmt                   ::= "if" "(" expr ")" stmt ( "else" stmt )?
 while_stmt                ::= "while" "(" expr ")" stmt
 
 do_while_stmt             ::= "do" stmt "while" "(" expr ")" ";"
+
+for_stmt                  ::= "for" "(" type IDENT "in" expr ")" stmt
 
 break_stmt                ::= "break" ";"
 

@@ -76,7 +76,7 @@ public class Lexer
     if (matchKeyword("while", TokenKind.WhileKW)) return;
     if (matchIdent()) return;
 
-    Diagnostics.Report(MessageKind.Fatal, $"Unexpected character '{currentChar}' [{line}:{column}]");
+    Diagnostics.Fatal($"Unexpected character '{currentChar}' [{line}:{column}]");
   }
 
   public bool Match(TokenKind kind) => CurrentToken.Kind == kind;
@@ -199,7 +199,7 @@ public class Lexer
 
     if (charAt(2) != '\'')
     {
-      Diagnostics.Report(MessageKind.Fatal, $"Invalid character literal [{line}:{column}]");
+      Diagnostics.Fatal($"Invalid character literal [{line}:{column}]");
       return false;
     }
 
@@ -218,7 +218,7 @@ public class Lexer
     {
       if (charAt(length) == '\0')
       {
-        Diagnostics.Report(MessageKind.Fatal, $"Unterminated string [{line}:{column}]");
+        Diagnostics.Fatal($"Unterminated string [{line}:{column}]");
         return false;
       }
       length++;

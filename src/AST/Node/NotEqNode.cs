@@ -1,10 +1,10 @@
 
-public class NotEqNode : NonLeafNode
+public class NeNode : NonLeafNode
 {
   public override Token Token { get; }
-  public override string Name { get; } = "NotEq";
+  public override string Name { get; } = "Ne";
 
-  public NotEqNode(Token token)
+  public NeNode(Token token)
   {
     Token = token;
   }

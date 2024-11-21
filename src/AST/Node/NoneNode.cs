@@ -1,7 +1,7 @@
 
 public class NoneNode : Node
 {
-  public override Token Token { get; } = new Token(TokenKind.None, -1, -1, string.Empty);
+  public override Token Token { get; } = Token.None;
   public override string Name { get; } = string.Empty;
 
   public override void Print(int depth)

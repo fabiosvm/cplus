@@ -3,6 +3,14 @@ public class Diagnostics
 {
   public List<Message> Messages { get; } = new List<Message>();
 
+  public void Note(string text) => Report(MessageKind.Note, text);
+
+  public void Warning(string text) => Report(MessageKind.Warning, text);
+
+  public void Error(string text) => Report(MessageKind.Error, text);
+
+  public void Fatal(string text) => Report(MessageKind.Fatal, text);
+
   public void Report(MessageKind kind, string text)
   {
     Messages.Add(new Message(kind, text));

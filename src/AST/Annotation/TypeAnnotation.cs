@@ -2,6 +2,7 @@
 public class TypeAnnotation : Annotation
 {
   public static readonly TypeAnnotation Void = new TypeAnnotation(TypeAnnotationKind.Void);
+  public static readonly TypeAnnotation Bool = new TypeAnnotation(TypeAnnotationKind.Bool);
   public static readonly TypeAnnotation Char = new TypeAnnotation(TypeAnnotationKind.Char);
   public static readonly TypeAnnotation Short = new TypeAnnotation(TypeAnnotationKind.Short);
   public static readonly TypeAnnotation Int = new TypeAnnotation(TypeAnnotationKind.Int);

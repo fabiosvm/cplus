@@ -16,7 +16,7 @@ public class Parser
     var ast = parseModule();
     if (isFatal()) return;
 
-    Diagnostics.Report(MessageKind.Note, "Parsing completed successfully");
+    Diagnostics.Note("Parsing completed successfully");
     Ast = ast;
   }
 
@@ -44,7 +44,7 @@ public class Parser
     var column = currentToken().Column;
     var lexeme = currentToken().Lexeme;
     var text = match(TokenKind.Eof) ? "end of file" : $"token '{lexeme}'";
-    Diagnostics.Report(MessageKind.Fatal, $"Unexpected {text} [{line}:{column}]");
+    Diagnostics.Fatal($"Unexpected {text} [{line}:{column}]");
   }
 
   private Node parseModule()
@@ -739,7 +739,7 @@ public class Parser
         var rhs = parseRelExpr();
         if (isFatal()) return Node.None;
 
-        var binOp = new NotEqNode(token);
+        var binOp = new NeNode(token);
         binOp.Children.Add(lhs);
         binOp.Children.Add(rhs);
         lhs = binOp;

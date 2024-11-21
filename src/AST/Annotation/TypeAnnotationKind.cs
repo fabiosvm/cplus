@@ -2,6 +2,7 @@
 public enum TypeAnnotationKind
 {
   Void,
+  Bool,
   Char,
   Short,
   Int,

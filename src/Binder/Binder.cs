@@ -18,7 +18,7 @@ public class Binder
   public void Bind()
   {
     visitor.Visit(Ast);
-    reportLocalSymbolsDefinedButNotUsed();
+    reportSymbolsDefinedButNotUsed();
   }
 
   private void registerActions()
@@ -36,6 +36,25 @@ public class Binder
 
     visitor.RegisterEnterAction<ScopeBlockNode>(enterScopeBlockNode);
     visitor.RegisterExitAction<ScopeBlockNode>(exitScopeBlockNode);
+  }
+
+  private string symbolKindToString(SymbolKind kind)
+  {
+    var str = "variable";
+    switch (kind)
+    {
+    case SymbolKind.Variable:
+      break;
+    case SymbolKind.Parameter:
+      str = "parameter";
+      break;
+    case SymbolKind.Function:
+      str = "function";
+      break;
+    default:
+      throw new ArgumentOutOfRangeException(nameof(kind), kind, null);
+    }
+    return str;
   }
 
   private void enterVarDeclNode(Node node)
@@ -56,12 +75,12 @@ public class Binder
     var name = ident.Lexeme;
     var line = ident.Line;
     var column = ident.Column;
-    Diagnostics.Report(MessageKind.Error, $"Cannot define variable with name '{name}' [{line}:{column}]");
+    Diagnostics.Error($"Cannot define variable with name '{name}' [{line}:{column}]");
 
-    var kind = symbol?.Kind;
-    line = symbol?.Ident.Line ?? -1;
-    column = symbol?.Ident.Column ?? -1;
-    Diagnostics.Report(MessageKind.Note, $"There is a {kind} with the same name [{line}:{column}]");
+    var kind = symbolKindToString(symbol.Kind);
+    line = symbol.Ident.Line;
+    column = symbol.Ident.Column;
+    Diagnostics.Note($"There is a {kind} with the same name [{line}:{column}]");
   }
 
   private void enterParamNode(Node node)
@@ -82,12 +101,12 @@ public class Binder
     var name = ident.Lexeme;
     var line = ident.Line;
     var column = ident.Column;
-    Diagnostics.Report(MessageKind.Error, $"Cannot define parameter with name '{name}' [{line}:{column}]");
+    Diagnostics.Error($"Cannot define parameter with name '{name}' [{line}:{column}]");
 
-    var kind = symbol?.Kind;
-    line = symbol?.Ident.Line ?? -1;
-    column = symbol?.Ident.Column ?? -1;
-    Diagnostics.Report(MessageKind.Note, $"There is a {kind} with the same name [{line}:{column}]");
+    var kind = symbolKindToString(symbol.Kind);
+    line = symbol.Ident.Line;
+    column = symbol.Ident.Column;
+    Diagnostics.Note($"There is a {kind} with the same name [{line}:{column}]");
   }
 
   private void enterFuncDeclNode(Node node)
@@ -110,12 +129,12 @@ public class Binder
     var name = ident.Lexeme;
     var line = ident.Line;
     var column = ident.Column;
-    Diagnostics.Report(MessageKind.Error, $"Cannot define function with name '{name}' [{line}:{column}]");
+    Diagnostics.Error($"Cannot define function with name '{name}' [{line}:{column}]");
 
-    var kind = symbol?.Kind;
-    line = symbol?.Ident.Line ?? -1;
-    column = symbol?.Ident.Column ?? -1;
-    Diagnostics.Report(MessageKind.Note, $"There is a {kind} with the same name [{line}:{column}]");
+    var kind = symbolKindToString(symbol.Kind);
+    line = symbol.Ident.Line;
+    column = symbol.Ident.Column;
+    Diagnostics.Note($"There is a {kind} with the same name [{line}:{column}]");
   }
 
   private void enterForNode(Node node)
@@ -145,7 +164,7 @@ public class Binder
       var name = ident.Lexeme;
       var line = ident.Line;
       var column = ident.Column;
-      Diagnostics.Report(MessageKind.Error, $"Symbol '{name}' used but not defined [{line}:{column}]");
+      Diagnostics.Error($"Symbol '{name}' used but not defined [{line}:{column}]");
       return;
     }
 
@@ -162,7 +181,7 @@ public class Binder
     SymbolTable.ExitScope();
   }
 
-  private void reportLocalSymbolsDefinedButNotUsed()
+  private void reportSymbolsDefinedButNotUsed()
   {
     foreach (var symbol in SymbolTable.Symbols)
     {
@@ -175,7 +194,7 @@ public class Binder
       var line = ident.Line;
       var column = ident.Column;
 
-      Diagnostics.Report(MessageKind.Warning, $"Local {kind} '{name}' defined but not used [{line}:{column}]");
+      Diagnostics.Warning($"{kind} '{name}' defined but not used [{line}:{column}]");
     }
   }
 }

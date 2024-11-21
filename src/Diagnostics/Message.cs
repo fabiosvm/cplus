@@ -12,6 +12,29 @@ public class Message
 
   public override string ToString()
   {
-    return $"{Kind}: {Text}";
+    var kind = kindToString();
+    return $"{kind}: {Text}";
+  }
+
+  private string kindToString()
+  {
+    var str = "NOTE";
+    switch (Kind)
+    {
+    case MessageKind.Note:
+      break;
+    case MessageKind.Warning:
+      str = "WARN";
+      break;
+    case MessageKind.Error:
+      str = "ERROR";
+      break;
+    case MessageKind.Fatal:
+      str = "FATAL";
+      break;
+    default:
+      throw new ArgumentOutOfRangeException(nameof(Kind), Kind, null);
+    }
+    return str;
   }
 }

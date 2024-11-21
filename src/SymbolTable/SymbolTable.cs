@@ -23,7 +23,7 @@ public class SymbolTable
     {
       var existing = Symbols[i];
       if (existing.Depth < scopeDepth) break;
-      if (existing.Name != name) continue;
+      if (!existing.Name.Equals(name)) continue;
       return (false, existing);
     }
 
@@ -42,7 +42,7 @@ public class SymbolTable
     for (var i = Symbols.Count - 1; i > -1; i--)
     {
       var existing = Symbols[i];
-      if (existing.Name != name) continue;
+      if (!existing.Name.Equals(name)) continue;
       symbol = existing;
       break;
     }

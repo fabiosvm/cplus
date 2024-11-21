@@ -4,7 +4,7 @@ func void mutate(inout int x) {
 }
 
 func void main() {
-  var int[] a = [1, 2, 3];
+  var int[] a = {1, 2, 3};
 
   mutate(&a[0]);
 

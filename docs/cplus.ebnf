@@ -68,11 +68,14 @@ call_expr                 ::= primary_expr ( subscr | call )*
 call                      ::= "(" ( expr ( "," expr )* )? ")"
 
 primary_expr              ::= "false" | "true" | INT | FLOAT | CHAR | STRING
-                            | array
+                            | new_expr
+                            | init_list
                             | ref
                             | IDENT
                             | "(" expr ")"
 
-array                     ::= "[" ( expr ( "," expr )* )? "]"
+new_expr                  ::= "new" type init_list?
+
+init_list                 ::= "{" ( expr ( "," expr )* )? "}"
 
 ref                       ::= "&" IDENT subscr*

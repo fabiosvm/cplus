@@ -48,6 +48,7 @@
 | InoutKW | `inout` |
 | IntKW | `int` |
 | LongKW | `long` |
+| NewKW | `new` |
 | ReturnKW | `return` |
 | ShortKW | `short` |
 | TrueKW | `true` |

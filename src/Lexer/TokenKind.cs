@@ -45,6 +45,7 @@ public enum TokenKind
   InoutKW,
   IntKW,
   LongKW,
+  NewKW,
   ReturnKW,
   ShortKW,
   TrueKW,

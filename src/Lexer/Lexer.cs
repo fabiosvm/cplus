@@ -64,6 +64,7 @@ public class Lexer
     if (matchKeyword("inout", TokenKind.InoutKW)) return;
     if (matchKeyword("int", TokenKind.IntKW)) return;
     if (matchKeyword("long", TokenKind.LongKW)) return;
+    if (matchKeyword("new", TokenKind.NewKW)) return;
     if (matchKeyword("return", TokenKind.ReturnKW)) return;
     if (matchKeyword("short", TokenKind.ShortKW)) return;
     if (matchKeyword("true", TokenKind.TrueKW)) return;

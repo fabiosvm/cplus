@@ -1029,8 +1029,11 @@ public class Parser
       return new StringLiteralNode(token);
     }
 
-    if (match(TokenKind.LBracket))
-      return parseArray();
+    if (match(TokenKind.NewKW))
+      return parseNewExpr();
+
+    if (match(TokenKind.LBrace))
+      return parseInitList();
 
     if (match(TokenKind.Amp))
       return parseRef();
@@ -1061,24 +1064,47 @@ public class Parser
     return Node.None;
   }
 
-  private Node parseArray()
+  private Node parseNewExpr()
+  {
+    var newToken = currentToken();
+    nextToken();
+    if (isFatal()) return Node.None;
+
+    var type = parseType();
+    if (isFatal()) return Node.None;
+
+    Node initList = Node.None;
+    if (match(TokenKind.LBrace))
+    {
+      initList = parseInitList();
+      if (isFatal()) return Node.None;
+    }
+
+    var newNode = new NewNode(newToken);
+    newNode.Children.Add(type);
+    newNode.Children.Add(initList);
+
+    return newNode;
+  }
+
+  private Node parseInitList()
   {
     var token = currentToken();
     nextToken();
     if (isFatal()) return Node.None;
 
-    var array = new ArrayNode(token);
+    var initList = new InitListNode(token);
 
-    if (match(TokenKind.RBracket))
+    if (match(TokenKind.RBrace))
     {
       nextToken();
       if (isFatal()) return Node.None;
-      return array;
+      return initList;
     }
 
     var expr = parseExpr();
     if (isFatal()) return Node.None;
-    array.Children.Add(expr);
+    initList.Children.Add(expr);
 
     while (match(TokenKind.Comma))
     {
@@ -1087,13 +1113,13 @@ public class Parser
 
       expr = parseExpr();
       if (isFatal()) return Node.None;
-      array.Children.Add(expr);
+      initList.Children.Add(expr);
     }
 
-    consume(TokenKind.RBracket);
+    consume(TokenKind.RBrace);
     if (isFatal()) return Node.None;
 
-    return array;
+    return initList;
   }
 
   private Node parseRef()

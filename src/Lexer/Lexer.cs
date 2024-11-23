@@ -20,7 +20,7 @@ public class Lexer
 
   public void NextToken()
   {
-    skipWhiteSpace();
+    do { skipWhitespace(); } while (skipComments());
 
     if (matchChar('\0', TokenKind.Eof)) return;
     if (matchChar(',', TokenKind.Comma)) return;
@@ -100,10 +100,33 @@ public class Lexer
 
   private char currentChar() => charAt(0);
 
-  private void skipWhiteSpace()
+  private void skipWhitespace()
   {
     while (char.IsWhiteSpace(currentChar()))
       nextChar();
+  }
+
+  private bool skipComments()
+  {
+    if (currentChar() != '/' || charAt(1) != '/')
+      return false;
+
+    nextChars(2);
+    for (;;)
+    {
+      if (currentChar() == '\0')
+        return true;
+
+      if (currentChar() == '\n')
+      {
+        nextChar();
+        break;
+      }
+
+      nextChar();
+    }
+
+    return true;
   }
 
   private void nextChar()

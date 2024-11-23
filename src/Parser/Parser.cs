@@ -675,7 +675,7 @@ public class Parser
       var rhs = parseAndExpr();
       if (isFatal()) return Node.None;
 
-      var binOp = new AndNode(token);
+      var binOp = new OrNode(token);
       binOp.Children.Add(lhs);
       binOp.Children.Add(rhs);
       lhs = binOp;

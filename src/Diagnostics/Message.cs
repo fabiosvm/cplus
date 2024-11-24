@@ -1,36 +1,42 @@
 
 public class Message
 {
+  public string File { get; }
+  public int Line { get; }
+  public int Column { get; }
   public MessageKind Kind { get; }
   public string Text { get; }
 
-  public Message(MessageKind kind, string text)
+  public Message(string file, int line, int column, MessageKind kind, string text)
   {
+    File = file;
+    Line = line;
+    Column = column;
     Kind = kind;
     Text = text;
   }
 
-  public override string ToString()
+  public void Print()
   {
     var kind = kindToString();
-    return $"{kind}: {Text}";
+    Console.WriteLine($"{File}({Line}, {Column}): {kind}: {Text}");
   }
 
   private string kindToString()
   {
-    var str = "NOTE";
+    var str = "note";
     switch (Kind)
     {
     case MessageKind.Note:
       break;
     case MessageKind.Warning:
-      str = "WARN";
+      str = "warning";
       break;
     case MessageKind.Error:
-      str = "ERROR";
+      str = "error";
       break;
     case MessageKind.Fatal:
-      str = "FATAL";
+      str = "fatal";
       break;
     default:
       throw new ArgumentOutOfRangeException(nameof(Kind), Kind, null);

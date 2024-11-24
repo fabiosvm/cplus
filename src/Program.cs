@@ -4,12 +4,8 @@ internal static class Program
   private static int Main(string[] args)
   {
     checkArgs(args);
-
-    var path = args[0];
-    var source = loadSource(path);
-
-    compile(source);
-
+    var file = args[0];
+    compile(file);
     return 0;
   }
 
@@ -17,7 +13,7 @@ internal static class Program
   {
     if (args.Length < 1)
     {
-      printError("No input file");
+      printError("No source file provided");
       printUsage();
       Environment.Exit(1);
     }
@@ -30,30 +26,48 @@ internal static class Program
 
   private static void printUsage()
   {
-    Console.WriteLine($"Usage: cplus <input>");
+    Console.WriteLine($"Usage: cplus <source-file>");
   }
 
-  private static string loadSource(string path)
+  private static string loadSource(string file)
   {
     string source = "";
     try {
-      source = File.ReadAllText(path);
+      source = File.ReadAllText(file);
     } catch (FileNotFoundException) {
-      printError($"File not found: {path}");
+      printError($"File not found: {file}");
       Environment.Exit(1);
     }
     return source;
   }
 
-  private static void compile(string source)
+  private static void compile(string file)
   {
-    var parser = new Parser(source);
+    var source = loadSource(file);
+
+    var parser = new Parser(file, source);
     parser.Parse();
 
-    var binder = new Binder(parser.Ast, parser.Diagnostics);
+    var diagnostics = parser.Diagnostics;
+
+    if (diagnostics.IsFatal())
+    {
+      diagnostics.Print();
+      Environment.Exit(1);
+    }
+
+    var ast = parser.Ast;
+
+    var binder = new Binder(file, ast, diagnostics);
     binder.Bind();
 
-    binder.Diagnostics.Print();
-    binder.Ast.Print(0);
+    if (diagnostics.HasErrors())
+    {
+      diagnostics.Print();
+      Environment.Exit(1);
+    }
+
+    diagnostics.Print();
+    ast.Print(0);
   }
 }

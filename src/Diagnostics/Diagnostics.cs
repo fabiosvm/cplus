@@ -3,22 +3,22 @@ public class Diagnostics
 {
   public List<Message> Messages { get; } = new List<Message>();
 
-  public void Note(string text) => Report(MessageKind.Note, text);
+  public void Note(string file, int line, int column, string text) => Report(file, line, column, MessageKind.Note, text);
 
-  public void Warning(string text) => Report(MessageKind.Warning, text);
+  public void Warning(string file, int line, int column, string text) => Report(file, line, column, MessageKind.Warning, text);
 
-  public void Error(string text) => Report(MessageKind.Error, text);
+  public void Error(string file, int line, int column, string text) => Report(file, line, column, MessageKind.Error, text);
 
-  public void Fatal(string text) => Report(MessageKind.Fatal, text);
+  public void Fatal(string file, int line, int column, string text) => Report(file, line, column, MessageKind.Fatal, text);
 
-  public void Report(MessageKind kind, string text)
+  public void Report(string file, int line, int column, MessageKind kind, string text)
   {
-    Messages.Add(new Message(kind, text));
+    Messages.Add(new Message(file, line, column, kind, text));
   }
 
   public bool HasErrors()
   {
-    return Messages.Any(message => message.Kind == MessageKind.Error);
+    return Messages.Any(message => message.Kind > MessageKind.Warning);
   }
 
   public bool IsFatal()
@@ -37,6 +37,6 @@ public class Diagnostics
   public void Print()
   {
     foreach (var message in Messages)
-      Console.WriteLine(message);
+      message.Print();
   }
 }

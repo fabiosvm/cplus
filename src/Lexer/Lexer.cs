@@ -1,6 +1,7 @@
 
 public class Lexer
 {
+  public string File { get; }
   public string Source { get; }
   public Diagnostics Diagnostics { get; } = new Diagnostics();
   private int pos;
@@ -8,8 +9,9 @@ public class Lexer
   private int column;
   public Token CurrentToken { get; private set; }
 
-  public Lexer(string source)
+  public Lexer(string file, string source)
   {
+    File = file;
     Source = source;
     pos = 0;
     line = 1;
@@ -76,7 +78,7 @@ public class Lexer
     if (matchKeyword("while", TokenKind.WhileKW)) return;
     if (matchIdent()) return;
 
-    Diagnostics.Fatal($"Unexpected character '{currentChar}' [{line}:{column}]");
+    Diagnostics.Fatal(File, line, column, $"Unexpected character '{currentChar}'");
   }
 
   public bool Match(TokenKind kind) => CurrentToken.Kind == kind;
@@ -222,7 +224,7 @@ public class Lexer
 
     if (charAt(2) != '\'')
     {
-      Diagnostics.Fatal($"Invalid character literal [{line}:{column}]");
+      Diagnostics.Fatal(File, line, column, $"Invalid character literal");
       return false;
     }
 
@@ -241,7 +243,7 @@ public class Lexer
     {
       if (charAt(length) == '\0')
       {
-        Diagnostics.Fatal($"Unterminated string [{line}:{column}]");
+        Diagnostics.Fatal(File, line, column, $"Unterminated string");
         return false;
       }
       length++;

@@ -5,9 +5,11 @@ public class Parser
   public Diagnostics Diagnostics { get; }
   public Node Ast { get; private set; } = Node.None;
 
-  public Parser(string source)
+  public string File => Lexer.File;
+
+  public Parser(string file, string source)
   {
-    Lexer = new Lexer(source);
+    Lexer = new Lexer(file, source);
     Diagnostics = Lexer.Diagnostics;
   }
 
@@ -15,8 +17,6 @@ public class Parser
   {
     var ast = parseModule();
     if (isFatal()) return;
-
-    Diagnostics.Note("Parsing completed successfully");
     Ast = ast;
   }
 
@@ -44,7 +44,7 @@ public class Parser
     var column = currentToken().Column;
     var lexeme = currentToken().Lexeme;
     var text = match(TokenKind.Eof) ? "end of file" : $"token '{lexeme}'";
-    Diagnostics.Fatal($"Unexpected {text} [{line}:{column}]");
+    Diagnostics.Fatal(File, line, column, $"Unexpected {text}");
   }
 
   private Node parseModule()

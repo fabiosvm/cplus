@@ -1,14 +1,16 @@
 
 public class Binder
 {
+  public string File { get; }
   public SymbolTable SymbolTable { get; } = new SymbolTable();
   private readonly AstVisitor visitor = new AstVisitor();
   public Node Ast { get; private set; }
   public Diagnostics Diagnostics { get; }
 
-  public Binder(Node ast, Diagnostics diagnostics)
+  public Binder(string file, Node ast, Diagnostics diagnostics)
   {
     registerActions();
+    File = file;
     Ast = ast;
     Diagnostics = diagnostics;
   }
@@ -75,12 +77,12 @@ public class Binder
     var name = ident.Lexeme;
     var line = ident.Line;
     var column = ident.Column;
-    Diagnostics.Error($"Cannot define variable with name '{name}' [{line}:{column}]");
+    Diagnostics.Error(File, line, column, $"Cannot define variable with name '{name}'");
 
     var kind = symbolKindToString(symbol.Kind);
     line = symbol.Ident.Line;
     column = symbol.Ident.Column;
-    Diagnostics.Note($"There is a {kind} with the same name [{line}:{column}]");
+    Diagnostics.Note(File, line, column, $"There is a {kind} with the same name");
   }
 
   private void enterParamNode(Node node)
@@ -101,12 +103,12 @@ public class Binder
     var name = ident.Lexeme;
     var line = ident.Line;
     var column = ident.Column;
-    Diagnostics.Error($"Cannot define parameter with name '{name}' [{line}:{column}]");
+    Diagnostics.Error(File, line, column, $"Cannot define parameter with name '{name}'");
 
     var kind = symbolKindToString(symbol.Kind);
     line = symbol.Ident.Line;
     column = symbol.Ident.Column;
-    Diagnostics.Note($"There is a {kind} with the same name [{line}:{column}]");
+    Diagnostics.Note(File, line, column, $"There is a {kind} with the same name");
   }
 
   private void enterFuncDeclNode(Node node)
@@ -129,12 +131,12 @@ public class Binder
     var name = ident.Lexeme;
     var line = ident.Line;
     var column = ident.Column;
-    Diagnostics.Error($"Cannot define function with name '{name}' [{line}:{column}]");
+    Diagnostics.Error(File, line, column, $"Cannot define function with name '{name}'");
 
     var kind = symbolKindToString(symbol.Kind);
     line = symbol.Ident.Line;
     column = symbol.Ident.Column;
-    Diagnostics.Note($"There is a {kind} with the same name [{line}:{column}]");
+    Diagnostics.Note(File, line, column, $"There is a {kind} with the same name");
   }
 
   private void enterForNode(Node node)
@@ -164,7 +166,7 @@ public class Binder
       var name = ident.Lexeme;
       var line = ident.Line;
       var column = ident.Column;
-      Diagnostics.Error($"Symbol '{name}' used but not defined [{line}:{column}]");
+      Diagnostics.Error(File, line, column, $"Symbol '{name}' used but not defined");
       return;
     }
 
@@ -194,7 +196,7 @@ public class Binder
       var line = ident.Line;
       var column = ident.Column;
 
-      Diagnostics.Warning($"{kind} '{name}' defined but not used [{line}:{column}]");
+      Diagnostics.Warning(File, line, column, $"{kind} '{name}' defined but not used");
     }
   }
 }

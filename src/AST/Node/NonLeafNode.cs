@@ -20,9 +20,7 @@ abstract public class NonLeafNode : Node
 
     if (Children.Count == 0) return;
 
-    Console.WriteLine($"{new string(' ', (depth + 1) * 2)}children:");
-
     foreach (var child in Children)
-      child.Print(depth + 2);
+      child.Print(depth + 1);
   }
 }

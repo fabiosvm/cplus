@@ -1,11 +1,13 @@
 
 public class MulNode : NonLeafNode
 {
-  public override Token Token { get; }
   public override string Name { get; } = "Mul";
+  public override int Line { get; }
+  public override int Column { get; }
 
   public MulNode(Token token)
   {
-    Token = token;
+    Line = token.Line;
+    Column = token.Column;
   }
 }

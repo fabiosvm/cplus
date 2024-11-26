@@ -20,6 +20,8 @@ public class Token
   {
     if (Kind == TokenKind.IntLiteral
      || Kind == TokenKind.FloatLiteral
+     || Kind == TokenKind.CharLiteral
+     || Kind == TokenKind.StringLiteral
      || Kind == TokenKind.Ident)
     {
       return $"{Kind}({Lexeme})";

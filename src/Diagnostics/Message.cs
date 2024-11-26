@@ -39,7 +39,7 @@ public class Message
       str = "fatal";
       break;
     default:
-      throw new ArgumentOutOfRangeException(nameof(Kind), Kind, null);
+      throw new Exception("Unknown message kind");
     }
     return str;
   }

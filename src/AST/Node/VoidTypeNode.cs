@@ -1,11 +1,13 @@
 
 public class VoidTypeNode : LeafNode
 {
-  public override Token Token { get; }
   public override string Name { get; } = "VoidType";
+  public override int Line { get; }
+  public override int Column { get; }
 
   public VoidTypeNode(Token token)
   {
-    Token = token;
+    Line = token.Line;
+    Column = token.Column;
   }
 }

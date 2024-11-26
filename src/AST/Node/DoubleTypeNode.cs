@@ -1,11 +1,13 @@
 
 public class DoubleTypeNode : LeafNode
 {
-  public override Token Token { get; }
   public override string Name { get; } = "DoubleType";
+  public override int Line { get; }
+  public override int Column { get; }
 
   public DoubleTypeNode(Token token)
   {
-    Token = token;
+    Line = token.Line;
+    Column = token.Column;
   }
 }

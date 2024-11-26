@@ -15,34 +15,31 @@ public class SymbolTable
     scopeDepth--;
   }
 
-  public (bool, Symbol) Define(Token ident, SymbolKind kind)
+  public (bool, Symbol) Define(int line, int column, string lexeme, SymbolKind kind)
   {
-    var name = ident.Lexeme;
-
     for (var i = Symbols.Count - 1; i > -1; i--)
     {
       var existing = Symbols[i];
       if (existing.Depth < scopeDepth) break;
-      if (!existing.Name.Equals(name)) continue;
+      if (!existing.Lexeme.Equals(lexeme)) continue;
       return (false, existing);
     }
 
-    var symbol = new Symbol(ident, kind, scopeDepth, nextIndex);
+    var symbol = new Symbol(line, column, lexeme, kind, scopeDepth, nextIndex);
     Symbols.Add(symbol);
 
     nextIndex++;
     return (true, symbol);
   }
 
-  public Symbol? Resolve(Token ident)
+  public Symbol? Resolve(string lexeme)
   {
-    var name = ident.Lexeme;
     Symbol? symbol = null;
 
     for (var i = Symbols.Count - 1; i > -1; i--)
     {
       var existing = Symbols[i];
-      if (!existing.Name.Equals(name)) continue;
+      if (!existing.Lexeme.Equals(lexeme)) continue;
       symbol = existing;
       break;
     }

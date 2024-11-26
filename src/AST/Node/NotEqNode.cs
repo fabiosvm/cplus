@@ -1,11 +1,13 @@
 
 public class NeNode : NonLeafNode
 {
-  public override Token Token { get; }
   public override string Name { get; } = "Ne";
+  public override int Line { get; }
+  public override int Column { get; }
 
   public NeNode(Token token)
   {
-    Token = token;
+    Line = token.Line;
+    Column = token.Column;
   }
 }

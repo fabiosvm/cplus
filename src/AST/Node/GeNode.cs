@@ -1,11 +1,13 @@
 
 public class GeNode : NonLeafNode
 {
-  public override Token Token { get; }
   public override string Name { get; } = "Ge";
+  public override int Line { get; }
+  public override int Column { get; }
 
   public GeNode(Token token)
   {
-    Token = token;
+    Line = token.Line;
+    Column = token.Column;
   }
 }

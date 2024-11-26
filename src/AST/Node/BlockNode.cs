@@ -1,11 +1,13 @@
 
 public class BlockNode : NonLeafNode
 {
-  public override Token Token { get; }
   public override string Name { get; } = "Block";
+  public override int Line { get; }
+  public override int Column { get; }
 
   public BlockNode(Token token)
   {
-    Token = token;
+    Line = token.Line;
+    Column = token.Column;
   }
 }

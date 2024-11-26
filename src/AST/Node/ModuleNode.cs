@@ -1,6 +1,7 @@
 
 public class ModuleNode : NonLeafNode
 {
-  public override Token Token { get; } = Token.None;
   public override string Name { get; } = "Module";
+  public override int Line => throw new NotImplementedException();
+  public override int Column => throw new NotImplementedException();
 }

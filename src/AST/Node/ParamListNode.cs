@@ -1,11 +1,13 @@
 
 public class ParamListNode : NonLeafNode
 {
-  public override Token Token { get; }
   public override string Name { get; } = "ParamList";
+  public override int Line { get; }
+  public override int Column { get; }
 
   public ParamListNode(Token token)
   {
-    Token = token;
+    Line = token.Line;
+    Column = token.Column;
   }
 }

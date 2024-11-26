@@ -61,12 +61,6 @@ internal static class Program
     var binder = new Binder(file, ast, diagnostics);
     binder.Bind();
 
-    if (diagnostics.HasErrors())
-    {
-      diagnostics.Print();
-      Environment.Exit(1);
-    }
-
     diagnostics.Print();
     ast.Print(0);
   }

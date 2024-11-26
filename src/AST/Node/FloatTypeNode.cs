@@ -1,11 +1,13 @@
 
 public class FloatTypeNode : LeafNode
 {
-  public override Token Token { get; }
   public override string Name { get; } = "FloatType";
+  public override int Line { get; }
+  public override int Column { get; }
 
   public FloatTypeNode(Token token)
   {
-    Token = token;
+    Line = token.Line;
+    Column = token.Column;
   }
 }

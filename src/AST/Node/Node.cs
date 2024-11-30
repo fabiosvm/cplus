@@ -19,12 +19,14 @@ abstract public class Node
     }
     Console.WriteLine(":");
 
-    Console.WriteLine($"{new string(' ', (depth + 1) * 2)}annotations:");
+    Console.WriteLine($"{new string(' ', (depth + 1) * 2)}(");
 
     foreach (var (key, value) in Annotations)
     {
       Console.WriteLine($"{new string(' ', (depth + 2) * 2)}{key}:");
       value.Print(depth + 3);
     }
+
+    Console.WriteLine($"{new string(' ', (depth + 1) * 2)})");
   }
 }

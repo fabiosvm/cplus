@@ -1,5 +1,5 @@
 
 public class IntTypeAnnotation : IntegerTypeAnnotation
 {
-  public override string Name { get; } = "IntType";
+  public override string Name { get; } = "int";
 }

@@ -494,7 +494,8 @@ public class Parser
     if (isFatal()) return Node.None;
 
     var ifElseStmt = new IfElseNode(token);
-    ifElseStmt.Children.Add(ifStmt);
+    ifElseStmt.Children.Add(expr);
+    ifElseStmt.Children.Add(thenStmt);
     ifElseStmt.Children.Add(elseStmt);
 
     return ifElseStmt;

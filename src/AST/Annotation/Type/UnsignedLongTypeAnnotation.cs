@@ -1,5 +1,5 @@
 
 public class UnsignedLongTypeAnnotation : UnsignedIntegerTypeAnnotation
 {
-  public override string Name { get; } = "UnsignedLongType";
+  public override string Name { get; } = "unsigned long";
 }

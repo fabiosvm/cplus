@@ -1,5 +1,5 @@
 
 public class VoidTypeAnnotation : TypeAnnotation
 {
-  public override string Name { get; } = "VoidType";
+  public override string Name { get; } = "void";
 }

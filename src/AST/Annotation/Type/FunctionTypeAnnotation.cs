@@ -1,9 +1,9 @@
 
 public class FunctionTypeAnnotation : TypeAnnotation
 {
-  public override string Name { get; } = "FunctionType";
+  public override string Name { get; } = "function";
   public TypeAnnotation ReturnType { get; }
-  public List<TypeAnnotation> ParameterTypes { get; } = new List<TypeAnnotation>();
+  public List<ParamTypeAnnotation> ParameterTypes { get; } = new List<ParamTypeAnnotation>();
 
   public FunctionTypeAnnotation(TypeAnnotation returnType)
   {
@@ -14,8 +14,7 @@ public class FunctionTypeAnnotation : TypeAnnotation
   {
     Console.WriteLine($"{new string(' ', depth * 2)}{Name}:");
 
-    Console.WriteLine($"{new string(' ', (depth + 1) * 2)}returnType:");
-    ReturnType.Print(depth + 2);
+    ReturnType.Print(depth + 1);
 
     Console.WriteLine($"{new string(' ', (depth + 1) * 2)}parameterTypes:");
 

@@ -1,5 +1,5 @@
 
 public class CharTypeAnnotation : IntegerTypeAnnotation
 {
-  public override string Name { get; } = "CharType";
+  public override string Name { get; } = "char";
 }

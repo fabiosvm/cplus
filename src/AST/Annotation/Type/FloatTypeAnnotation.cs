@@ -1,5 +1,5 @@
 
 public class FloatTypeAnnotation : FloatingPointTypeAnnotation
 {
-  public override string Name { get; } = "FloatType";
+  public override string Name { get; } = "float";
 }

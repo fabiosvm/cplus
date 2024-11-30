@@ -1,4 +1,6 @@
 
+using System.Diagnostics;
+
 public class Message
 {
   public string File { get; }
@@ -39,7 +41,7 @@ public class Message
       str = "fatal";
       break;
     default:
-      throw new Exception("Unknown message kind");
+      throw new UnreachableException();
     }
     return str;
   }

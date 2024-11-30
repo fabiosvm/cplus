@@ -1,9 +1,11 @@
 
+using System.Diagnostics;
+
 public class Binder
 {
-  public string File { get; }
   public SymbolTable SymbolTable { get; } = new SymbolTable();
   private readonly AstVisitor visitor = new AstVisitor();
+  public string File { get; }
   public Node Ast { get; private set; }
   public Diagnostics Diagnostics { get; }
 
@@ -54,7 +56,7 @@ public class Binder
       str = "function";
       break;
     default:
-      throw new Exception("Unknown symbol kind");
+      throw new UnreachableException();
     }
     return str;
   }
@@ -65,9 +67,9 @@ public class Binder
     var identNode = (IdentNode) varDeclNode.Children[1];
     var line = identNode.Line;
     var column = identNode.Column;
-    var lexeme = identNode.Lexeme;
+    var name = identNode.Lexeme;
 
-    var (defined, symbol) = SymbolTable.Define(line, column, lexeme, SymbolKind.Variable);
+    var (defined, symbol) = SymbolTable.Define(line, column, name, SymbolKind.Variable, varDeclNode);
 
     if (defined)
     {
@@ -76,7 +78,7 @@ public class Binder
       return;
     }
 
-    Diagnostics.Error(File, line, column, $"Cannot define variable with name '{lexeme}'");
+    Diagnostics.Error(File, line, column, $"Cannot define variable with name '{name}'");
 
     var kind = symbolKindToString(symbol.Kind);
     line = symbol.Line;
@@ -90,9 +92,9 @@ public class Binder
     var identNode = (IdentNode) paramNode.Children[2];
     var line = identNode.Line;
     var column = identNode.Column;
-    var lexeme = identNode.Lexeme;
+    var name = identNode.Lexeme;
 
-    var (defined, symbol) = SymbolTable.Define(line, column, lexeme, SymbolKind.Parameter);
+    var (defined, symbol) = SymbolTable.Define(line, column, name, SymbolKind.Parameter, paramNode);
 
     if (defined)
     {
@@ -101,7 +103,7 @@ public class Binder
       return;
     }
 
-    Diagnostics.Error(File, line, column, $"Cannot define parameter with name '{lexeme}'");
+    Diagnostics.Error(File, line, column, $"Cannot define parameter with name '{name}'");
 
     var kind = symbolKindToString(symbol.Kind);
     line = symbol.Line;
@@ -115,9 +117,9 @@ public class Binder
     var identNode = (IdentNode) funcDeclNode.Children[1];
     var line = identNode.Line;
     var column = identNode.Column;
-    var lexeme = identNode.Lexeme;
+    var name = identNode.Lexeme;
 
-    var (defined, symbol) = SymbolTable.Define(line, column, lexeme, SymbolKind.Function);
+    var (defined, symbol) = SymbolTable.Define(line, column, name, SymbolKind.Function, funcDeclNode);
 
     if (defined)
     {
@@ -128,7 +130,7 @@ public class Binder
       return;
     }
 
-    Diagnostics.Error(File, line, column, $"Cannot define function with name '{lexeme}'");
+    Diagnostics.Error(File, line, column, $"Cannot define function with name '{name}'");
 
     var kind = symbolKindToString(symbol.Kind);
     line = symbol.Line;
@@ -154,15 +156,15 @@ public class Binder
   private void enterSymbolNode(Node node)
   {
     var symbolNode = (SymbolNode) node;
-    var lexeme = symbolNode.Lexeme;
+    var name = symbolNode.Lexeme;
 
-    var symbol = SymbolTable.Resolve(lexeme);
+    var symbol = SymbolTable.Resolve(name);
 
     if (symbol == null)
     {
       var line = symbolNode.Line;
       var column = symbolNode.Column;
-      Diagnostics.Error(File, line, column, $"Symbol '{lexeme}' used but not defined");
+      Diagnostics.Error(File, line, column, $"Symbol '{name}' used but not defined");
       return;
     }
 
@@ -189,9 +191,9 @@ public class Binder
       var kind = symbol.Kind;
       var line = symbol.Line;
       var column = symbol.Column;
-      var lexeme = symbol.Lexeme;
+      var name = symbol.Name;
 
-      Diagnostics.Warning(File, line, column, $"{kind} '{lexeme}' defined but not used");
+      Diagnostics.Warning(File, line, column, $"{kind} '{name}' defined but not used");
     }
   }
 }

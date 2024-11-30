@@ -1,5 +1,5 @@
 
 public class DoubleTypeAnnotation : FloatingPointTypeAnnotation
 {
-  public override string Name { get; } = "DoubleType";
+  public override string Name { get; } = "double";
 }

@@ -1,5 +1,5 @@
 
 public class BoolTypeAnnotation : TypeAnnotation
 {
-  public override string Name { get; } = "BoolType";
+  public override string Name { get; } = "bool";
 }

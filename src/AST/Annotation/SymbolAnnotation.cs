@@ -1,7 +1,9 @@
 
+using System.Diagnostics;
+
 public class SymbolAnnotation : Annotation
 {
-  public override string Name => throw new NotImplementedException();
+  public override string Name => throw new UnreachableException();
   public Symbol Symbol { get; }
 
   public SymbolAnnotation(Symbol symbol)
@@ -11,8 +13,8 @@ public class SymbolAnnotation : Annotation
 
   public override void Print(int depth)
   {
-    Console.WriteLine($"{new string(' ', depth * 2)}lexeme: {Symbol.Lexeme}");
-    Console.WriteLine($"{new string(' ', depth * 2)}kind: {Symbol.Kind}");
-    Console.WriteLine($"{new string(' ', depth * 2)}index: {Symbol.Index}");
+    Console.WriteLine($"{new string(' ', depth * 2)}name='{Symbol.Name}'");
+    Console.WriteLine($"{new string(' ', depth * 2)}kind={Symbol.Kind}");
+    Console.WriteLine($"{new string(' ', depth * 2)}index={Symbol.Index}");
   }
 }

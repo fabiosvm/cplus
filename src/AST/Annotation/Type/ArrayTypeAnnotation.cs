@@ -1,7 +1,7 @@
 
 public class ArrayTypeAnnotation : TypeAnnotation
 {
-  public override string Name { get; } = "array";
+  public override string Name => ElementType.Name + "[]";
 
   public TypeAnnotation ElementType { get; }
 

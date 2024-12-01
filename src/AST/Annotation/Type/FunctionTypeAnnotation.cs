@@ -1,7 +1,7 @@
 
 public class FunctionTypeAnnotation : TypeAnnotation
 {
-  public override string Name { get; } = "function";
+  public override string Name => "function " + ReturnType.Name + "(" + string.Join(", ", ParameterTypes.Select(p => p.Name)) + ")";
   public TypeAnnotation ReturnType { get; }
   public List<ParamTypeAnnotation> ParameterTypes { get; } = new List<ParamTypeAnnotation>();
 

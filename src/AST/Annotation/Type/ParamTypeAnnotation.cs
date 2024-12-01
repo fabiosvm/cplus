@@ -1,7 +1,7 @@
 
 public class ParamTypeAnnotation : TypeAnnotation
 {
-  public override string Name { get; } = "ParamType";
+  public override string Name => IsInout ? "inout " + Type.Name : Type.Name;
   public bool IsInout { get; }
   public TypeAnnotation Type { get; }
 

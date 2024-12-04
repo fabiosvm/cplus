@@ -10,15 +10,18 @@ public class FunctionTypeAnnotation : TypeAnnotation
     ReturnType = returnType;
   }
 
-  public override void Print(int depth)
+  public FunctionTypeAnnotation(FuncDeclNode funcDecl)
   {
-    Console.WriteLine($"{new string(' ', depth * 2)}{Name}:");
+    var retType = funcDecl.Children[0];
+    ReturnType = TypeAnnotation.FromNode(retType);
 
-    ReturnType.Print(depth + 1);
+    var paramList = (ParamListNode) funcDecl.Children[2];
 
-    Console.WriteLine($"{new string(' ', (depth + 1) * 2)}parameterTypes:");
-
-    foreach (var parameterType in ParameterTypes)
-      parameterType.Print(depth + 2);
+    foreach (var param in paramList.Children)
+    {
+      var paramNode = (ParamNode) param;
+      var annotation = new ParamTypeAnnotation(paramNode);
+      ParameterTypes.Add(annotation);
+    }
   }
 }

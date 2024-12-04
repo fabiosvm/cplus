@@ -10,9 +10,9 @@ public class ArrayTypeAnnotation : TypeAnnotation
     ElementType = elementType;
   }
 
-  public override void Print(int depth)
+  public ArrayTypeAnnotation(ArrayTypeNode arrayType)
   {
-    Console.WriteLine($"{new string(' ', depth * 2)}{Name}:");
-    ElementType.Print(depth + 1);
+    var type = arrayType.Children[0];
+    ElementType = TypeAnnotation.FromNode(type);
   }
 }

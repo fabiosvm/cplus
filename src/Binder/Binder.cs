@@ -19,6 +19,10 @@ public class Binder
 
   private void annotateSymbol(Node node, SymbolAnnotation annotation) => node.Annotations.Add("symbol", annotation);
 
+  private void annotateType(Node node, TypeAnnotation type) => node.Annotations.Add("type", type);
+
+  private TypeAnnotation getTypeAnnotation(Node node) => (TypeAnnotation) node.Annotations["type"];
+
   public void Bind()
   {
     visitor.Visit(Ast);
@@ -64,7 +68,9 @@ public class Binder
   private void enterVarDeclNode(Node node)
   {
     var varDeclNode = (VarDeclNode) node;
+    var typeNode = varDeclNode.Children[0];
     var identNode = (IdentNode) varDeclNode.Children[1];
+
     var line = identNode.Line;
     var column = identNode.Column;
     var name = identNode.Lexeme;
@@ -73,8 +79,8 @@ public class Binder
 
     if (defined)
     {
-      var annotation = new SymbolAnnotation(symbol);
-      annotateSymbol(node, annotation);
+      annotateSymbol(node, new SymbolAnnotation(symbol));
+      annotateType(node, TypeAnnotation.FromNode(typeNode));
       return;
     }
 
@@ -98,8 +104,8 @@ public class Binder
 
     if (defined)
     {
-      var annotation = new SymbolAnnotation(symbol);
-      annotateSymbol(node, annotation);
+      annotateSymbol(node, new SymbolAnnotation(symbol));
+      annotateType(node, new ParamTypeAnnotation(paramNode));
       return;
     }
 
@@ -123,8 +129,8 @@ public class Binder
 
     if (defined)
     {
-      var annotation = new SymbolAnnotation(symbol);
-      annotateSymbol(node, annotation);
+      annotateSymbol(node, new SymbolAnnotation(symbol));
+      annotateType(node, new FunctionTypeAnnotation(funcDeclNode));
 
       SymbolTable.EnterScope();
       return;
@@ -169,6 +175,7 @@ public class Binder
     }
 
     annotateSymbol(node, new SymbolAnnotation(symbol));
+    annotateType(node, getTypeAnnotation(symbol.Node));
   }
 
   private void enterScopeBlockNode(Node node)

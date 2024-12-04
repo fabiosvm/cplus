@@ -11,10 +11,12 @@ public class ParamTypeAnnotation : TypeAnnotation
     Type = type;
   }
 
-  public override void Print(int depth)
+  public ParamTypeAnnotation(ParamNode param)
   {
-    Console.WriteLine($"{new string(' ', depth * 2)}{Name}:");
-    Console.WriteLine($"{new string(' ', (depth + 1) * 2)}isInout={IsInout}");
-    Type.Print(depth + 1);
+    var inout = param.Children[0];
+    var type = param.Children[1];
+
+    IsInout = inout is InoutNode;
+    Type = TypeAnnotation.FromNode(type);
   }
 }
